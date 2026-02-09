@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Weights.Domain.Entities;
-using Weights.Domain.Enums;
 
 namespace Weights.Infrastructure.Data.Configurations;
 
