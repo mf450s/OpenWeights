@@ -1,0 +1,19 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore": "Information"
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Database=weights;Username=postgres;Password=yourpassword"
+  },
+  "Jwt": {
+    "SecretKey": "your-super-secret-key-minimum-32-characters-long-for-development",
+    "Issuer": "WeightsAPI",
+    "Audience": "WeightsClient",
+    "ExpirationMinutes": 60
+  },
+  "AllowedHosts": "*"
+}
