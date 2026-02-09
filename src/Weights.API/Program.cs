@@ -103,11 +103,12 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Apply migrations on startup
+// Apply migrations and seed data on startup
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate();
+    DbSeeder.SeedData(dbContext);
 }
 
 // Configure the HTTP request pipeline.
