@@ -19,5 +19,8 @@
     <ProjectReference Include="..\Weights.Application\Weights.Application.csproj" />
     <ProjectReference Include="..\Weights.Infrastructure\Weights.Infrastructure.csproj" />
   </ItemGroup>
+  <PropertyGroup>
+    <AllowMissingPrunePackageData>true</AllowMissingPrunePackageData>
+  </PropertyGroup>
 
 </Project>
