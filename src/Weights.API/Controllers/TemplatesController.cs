@@ -9,14 +9,9 @@ namespace Weights.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class TemplatesController : ControllerBase
+public class TemplatesController(ITemplateService templateService) : ControllerBase
 {
-    private readonly ITemplateService _templateService;
-
-    public TemplatesController(ITemplateService templateService)
-    {
-        _templateService = templateService;
-    }
+    private readonly ITemplateService _templateService = templateService;
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]

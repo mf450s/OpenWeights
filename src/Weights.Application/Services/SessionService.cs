@@ -5,14 +5,9 @@ using Weights.Domain.Interfaces;
 
 namespace Weights.Application.Services;
 
-public class SessionService : ISessionService
+public class SessionService(IUnitOfWork unitOfWork) : ISessionService
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public SessionService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-    }
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<SessionResponse> CreateAsync(Guid userId, CreateSessionRequest request, CancellationToken cancellationToken = default)
     {

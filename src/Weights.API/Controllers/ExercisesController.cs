@@ -8,14 +8,9 @@ namespace Weights.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ExercisesController : ControllerBase
+public class ExercisesController(IExerciseService exerciseService) : ControllerBase
 {
-    private readonly IExerciseService _exerciseService;
-
-    public ExercisesController(IExerciseService exerciseService)
-    {
-        _exerciseService = exerciseService;
-    }
+    private readonly IExerciseService _exerciseService = exerciseService;
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]

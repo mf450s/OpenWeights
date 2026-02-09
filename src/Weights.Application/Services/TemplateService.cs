@@ -5,14 +5,9 @@ using Weights.Domain.Interfaces;
 
 namespace Weights.Application.Services;
 
-public class TemplateService : ITemplateService
+public class TemplateService(IUnitOfWork unitOfWork) : ITemplateService
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public TemplateService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-    }
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<IEnumerable<WorkoutTemplateListResponse>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {

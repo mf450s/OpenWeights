@@ -5,12 +5,8 @@ using Weights.Infrastructure.Data;
 
 namespace Weights.Infrastructure.Repositories;
 
-public class UserRepository : Repository<User, Guid>, IUserRepository
+public class UserRepository(ApplicationDbContext context) : Repository<User, Guid>(context), IUserRepository
 {
-    public UserRepository(ApplicationDbContext context) : base(context)
-    {
-    }
-
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         return await DbSet.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);

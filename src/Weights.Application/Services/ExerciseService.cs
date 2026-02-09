@@ -4,14 +4,9 @@ using Weights.Domain.Interfaces;
 
 namespace Weights.Application.Services;
 
-public class ExerciseService : IExerciseService
+public class ExerciseService(IUnitOfWork unitOfWork) : IExerciseService
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public ExerciseService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-    }
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<IEnumerable<ExerciseResponse>> GetAllAsync(int? muscleId = null, CancellationToken cancellationToken = default)
     {

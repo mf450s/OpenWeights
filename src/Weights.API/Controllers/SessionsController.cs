@@ -9,14 +9,9 @@ namespace Weights.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class SessionsController : ControllerBase
+public class SessionsController(ISessionService sessionService) : ControllerBase
 {
-    private readonly ISessionService _sessionService;
-
-    public SessionsController(ISessionService sessionService)
-    {
-        _sessionService = sessionService;
-    }
+    private readonly ISessionService _sessionService = sessionService;
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]

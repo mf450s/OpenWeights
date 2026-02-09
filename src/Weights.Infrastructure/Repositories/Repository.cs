@@ -5,16 +5,10 @@ using Weights.Infrastructure.Data;
 
 namespace Weights.Infrastructure.Repositories;
 
-public class Repository<TEntity, TId> : IRepository<TEntity, TId> where TEntity : class
+public class Repository<TEntity, TId>(ApplicationDbContext context) : IRepository<TEntity, TId> where TEntity : class
 {
-    protected readonly ApplicationDbContext Context;
-    protected readonly DbSet<TEntity> DbSet;
-
-    public Repository(ApplicationDbContext context)
-    {
-        Context = context;
-        DbSet = context.Set<TEntity>();
-    }
+    protected readonly ApplicationDbContext Context = context;
+    protected readonly DbSet<TEntity> DbSet = context.Set<TEntity>();
 
     public virtual async Task<TEntity?> GetByIdAsync(TId id, CancellationToken cancellationToken = default)
     {

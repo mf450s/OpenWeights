@@ -5,12 +5,8 @@ using Weights.Infrastructure.Data;
 
 namespace Weights.Infrastructure.Repositories;
 
-public class WorkoutTemplateRepository : Repository<WorkoutTemplate, int>, IWorkoutTemplateRepository
+public class WorkoutTemplateRepository(ApplicationDbContext context) : Repository<WorkoutTemplate, int>(context), IWorkoutTemplateRepository
 {
-    public WorkoutTemplateRepository(ApplicationDbContext context) : base(context)
-    {
-    }
-
     public async Task<IEnumerable<WorkoutTemplate>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         return await DbSet

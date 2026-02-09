@@ -5,16 +5,10 @@ using Weights.Domain.Interfaces;
 
 namespace Weights.Application.Services;
 
-public class AuthService : IAuthService
+public class AuthService(IUnitOfWork unitOfWork, IJwtService jwtService) : IAuthService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IJwtService _jwtService;
-
-    public AuthService(IUnitOfWork unitOfWork, IJwtService jwtService)
-    {
-        _unitOfWork = unitOfWork;
-        _jwtService = jwtService;
-    }
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly IJwtService _jwtService = jwtService;
 
     public async Task<UserResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
     {

@@ -5,12 +5,8 @@ using Weights.Infrastructure.Data;
 
 namespace Weights.Infrastructure.Repositories;
 
-public class MuscleRepository : Repository<Muscle, int>, IMuscleRepository
+public class MuscleRepository(ApplicationDbContext context) : Repository<Muscle, int>(context), IMuscleRepository
 {
-    public MuscleRepository(ApplicationDbContext context) : base(context)
-    {
-    }
-
     public async Task<IEnumerable<Muscle>> GetByBodyPartAsync(string bodyPart, CancellationToken cancellationToken = default)
     {
         return await DbSet

@@ -4,32 +4,22 @@ using Weights.Infrastructure.Data;
 
 namespace Weights.Infrastructure.Repositories;
 
-public class UnitOfWork : IUnitOfWork
+public class UnitOfWork(
+    ApplicationDbContext context,
+    IUserRepository users,
+    IMuscleRepository muscles,
+    IExerciseRepository exercises,
+    IWorkoutTemplateRepository workoutTemplates,
+    IWorkoutSessionRepository workoutSessions) : IUnitOfWork
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ApplicationDbContext _context = context;
     private IDbContextTransaction? _transaction;
 
-    public IUserRepository Users { get; }
-    public IMuscleRepository Muscles { get; }
-    public IExerciseRepository Exercises { get; }
-    public IWorkoutTemplateRepository WorkoutTemplates { get; }
-    public IWorkoutSessionRepository WorkoutSessions { get; }
-
-    public UnitOfWork(
-        ApplicationDbContext context,
-        IUserRepository users,
-        IMuscleRepository muscles,
-        IExerciseRepository exercises,
-        IWorkoutTemplateRepository workoutTemplates,
-        IWorkoutSessionRepository workoutSessions)
-    {
-        _context = context;
-        Users = users;
-        Muscles = muscles;
-        Exercises = exercises;
-        WorkoutTemplates = workoutTemplates;
-        WorkoutSessions = workoutSessions;
-    }
+    public IUserRepository Users { get; } = users;
+    public IMuscleRepository Muscles { get; } = muscles;
+    public IExerciseRepository Exercises { get; } = exercises;
+    public IWorkoutTemplateRepository WorkoutTemplates { get; } = workoutTemplates;
+    public IWorkoutSessionRepository WorkoutSessions { get; } = workoutSessions;
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
