@@ -1,10 +1,18 @@
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
-[Rr]eleasePublic/
-[xX]64/
-[xX]86/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
@@ -15,18 +23,102 @@ bld/
 
 # Visual Studio cache/options
 .vs/
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
 
-# Generated files
-[Gg]enerated\ [Ff]iles/
+# Visual Studio Code
+.vscode/
+*.code-workspace
 
-# .NET Core
-project.lock.json
-project.fragment.lock.json
-artifacts/
+# Rider
+.idea/
+*.sln.iml
 
-# Test results
-[Tt]est[Rr]esult*/
+# User-specific files (MonoDevelop/Xamarin Studio)
+*.userprefs
+
+# Mono auto generated files
+mono_crash.*
+
+# Files built by Visual Studio
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+
+# Entity Framework Migrations
+# Migrations/
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# appsettings (keep only templates)
+appsettings.json
+appsettings.*.json
+!appsettings.Development.json.template
+
+# Environment variables
+.env
+.env.local
+
+# Docker
+docker-compose.override.yml
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+
+# Test Coverage
+coverage/
+*.coverage
+*.coveragexml
+
+# Benchmark Results
+BenchmarkDotNet.Artifacts/
