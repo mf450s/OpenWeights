@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: weights-postgres-prod
+    environment:
+      POSTGRES_DB: weights_prod
+      POSTGRES_USER: ${DB_USER:-weights}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-CHANGE_ME_IN_PRODUCTION}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    networks:
+      - weights-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-weights}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: ghcr.io/mf450s/weights:latest
+    container_name: weights-api-prod
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=weights_prod;Username=${DB_USER:-weights};Password=${DB_PASSWORD:-CHANGE_ME_IN_PRODUCTION}
+      - Jwt__SecretKey=${JWT_SECRET:-CHANGE_ME_MINIMUM_32_CHARACTERS_REQUIRED}
+      - Jwt__Issuer=WeightsAPI
+      - Jwt__Audience=WeightsClient
+      - Jwt__ExpirationMinutes=1440
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - weights-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+networks:
+  weights-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

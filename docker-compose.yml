@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: weights-api
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__DefaultConnection=Host=db;Database=weights;Username=postgres;Password=weights123
+      - Jwt__SecretKey=SuperSecretKeyForJwtTokenGenerationMinimum32Chars
+      - Jwt__Issuer=WeightsAPI
+      - Jwt__Audience=WeightsClient
+      - Jwt__ExpirationMinutes=60
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - weights-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: weights-db
+    environment:
+      - POSTGRES_DB=weights
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=weights123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - weights-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  weights-network:
+    driver: bridge
