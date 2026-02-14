@@ -122,3 +122,5 @@ coverage/
 
 # Benchmark Results
 BenchmarkDotNet.Artifacts/
+
+Migrations/
