@@ -19,20 +19,19 @@ public class SessionService(IUnitOfWork unitOfWork) : ISessionService
             Date = request.Date,
             StartTime = request.StartTime,
             EndTime = request.EndTime,
-            Note = request.Note
+            Note = request.Note,
+            SetHistories = request.Sets.Select(s => new SetHistory
+            {
+                ExerciseId = s.ExerciseId,
+                SetNumber = s.SetNumber,
+                Weight = s.Weight,
+                Reps = s.Reps,
+                RIR = s.Rir,
+                DurationSeconds = s.DurationSeconds,
+                DistanceMeters = s.DistanceMeters,
+                PerformedAt = s.PerformedAt
+            }).ToList()
         };
-
-        session.SetHistories = request.Sets.Select(s => new SetHistory
-        {
-            ExerciseId = s.ExerciseId,
-            SetNumber = s.SetNumber,
-            Weight = s.Weight,
-            Reps = s.Reps,
-            RIR = s.Rir,
-            DurationSeconds = s.DurationSeconds,
-            DistanceMeters = s.DistanceMeters,
-            PerformedAt = s.PerformedAt
-        }).ToList();
 
         await _unitOfWork.WorkoutSessions.AddAsync(session, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
