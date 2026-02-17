@@ -42,6 +42,8 @@ public class SetDto
 
     public decimal? DistanceMeters { get; set; }
 
+    public string? Side { get; set; }
+
     [Required]
     public DateTime PerformedAt { get; set; }
 }
