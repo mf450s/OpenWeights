@@ -7,6 +7,7 @@ public class Exercise : Entity<int>
     public string Name { get; set; } = string.Empty;
     public TrackType TrackType { get; set; }
     public string? Description { get; set; }
+    public Laterality Laterality { get; set; } = Laterality.Bilateral;
 
     // Navigation properties
     public ICollection<ExerciseMuscle> ExerciseMuscles { get; set; } = new List<ExerciseMuscle>();
