@@ -81,6 +81,7 @@ Ruft alle verfügbaren Übungen ab.
     "id": 1,
     "name": "Barbell Bench Press",
     "trackType": "WeightReps",
+    "laterality": "Bilateral",
     "muscles": [
       {
         "id": 5,
@@ -88,9 +89,29 @@ Ruft alle verfügbaren Übungen ab.
         "targetType": "Primary"
       }
     ]
+  },
+  {
+    "id": 2,
+    "name": "Dumbbell Curl",
+    "trackType": "WeightReps",
+    "laterality": "Unilateral",
+    "muscles": [
+      {
+        "id": 8,
+        "name": "Biceps Brachii",
+        "targetType": "Primary"
+      }
+    ]
   }
 ]
 ```
+
+### Laterality-Typen
+
+- `Bilateral`: Übung wird mit beiden Seiten gleichzeitig ausgeführt (z.B. Barbell Bench Press, Squat)
+- `Unilateral`: Übung wird einseitig ausgeführt (z.B. Dumbbell Curl, Bulgarian Split Squat)
+
+**Wichtig:** Bei unilateralen Übungen muss beim Set-Logging die Seite (`side`) angegeben werden.
 
 ### GET /exercises/{id}
 
@@ -182,16 +203,52 @@ Speichert ein absolviertes Training.
       "reps": 8,
       "rir": 2.0,
       "performedAt": "2024-05-20T17:10:00Z"
+    },
+    {
+      "exerciseId": 2,
+      "setNumber": 1,
+      "weight": 12.5,
+      "reps": 10,
+      "rir": 1.5,
+      "side": "Left",
+      "performedAt": "2024-05-20T17:25:00Z"
+    },
+    {
+      "exerciseId": 2,
+      "setNumber": 2,
+      "weight": 12.5,
+      "reps": 10,
+      "rir": 1.5,
+      "side": "Right",
+      "performedAt": "2024-05-20T17:27:00Z"
     }
   ]
 }
 ```
+
+### Side-Validierung
+
+**Für unilaterale Übungen (Laterality = Unilateral):**
+- Das Feld `side` ist **erforderlich**
+- Erlaubte Werte: `"Left"` oder `"Right"`
+- Fehlt das Feld, wird ein **400 Bad Request** zurückgegeben
+
+**Für bilaterale Übungen (Laterality = Bilateral):**
+- Das Feld `side` ist **optional**
+- Wird ignoriert, falls angegeben
 
 **Response 201 Created:**
 ```json
 {
   "id": 505,
   "status": "success"
+}
+```
+
+**Response 400 Bad Request (Side fehlt bei unilateral):**
+```json
+{
+  "error": "Side must be specified (Left or Right) for unilateral exercises."
 }
 ```
 
