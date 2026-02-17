@@ -30,6 +30,11 @@ public class SetHistoryConfiguration : IEntityTypeConfiguration<SetHistory>
         builder.Property(sh => sh.DistanceMeters)
             .HasPrecision(10, 2);
 
+        builder.Property(sh => sh.Side)
+            .HasConversion<string>()
+            .HasMaxLength(10)
+            .IsRequired(false);
+
         builder.Property(sh => sh.PerformedAt)
             .IsRequired();
     }

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Weights.Domain.Entities;
+using Weights.Domain.Enums;
 
 namespace Weights.Infrastructure.Data.Configurations;
 
@@ -18,6 +19,12 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
             .IsRequired()
             .HasConversion<string>()
             .HasMaxLength(20);
+
+        builder.Property(e => e.Laterality)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .HasDefaultValue(Laterality.Bilateral);
 
         builder.Property(e => e.Description)
             .HasColumnType("text");
