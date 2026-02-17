@@ -1,3 +1,5 @@
+using Weights.Domain.Enums;
+
 namespace Weights.Domain.Entities;
 
 public class SetHistory : Entity<int>
@@ -14,5 +16,6 @@ public class SetHistory : Entity<int>
     public decimal? RIR { get; set; }
     public int? DurationSeconds { get; set; }
     public decimal? DistanceMeters { get; set; }
+    public Side? Side { get; set; }
     public DateTime PerformedAt { get; set; }
 }
