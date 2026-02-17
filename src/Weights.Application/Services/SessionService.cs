@@ -1,6 +1,7 @@
 using Weights.Application.DTOs.Sessions;
 using Weights.Application.Interfaces;
 using Weights.Domain.Entities;
+using Weights.Domain.Enums;
 using Weights.Domain.Interfaces;
 
 namespace Weights.Application.Services;
@@ -29,6 +30,7 @@ public class SessionService(IUnitOfWork unitOfWork) : ISessionService
                 RIR = s.Rir,
                 DurationSeconds = s.DurationSeconds,
                 DistanceMeters = s.DistanceMeters,
+                Side = !string.IsNullOrWhiteSpace(s.Side) && Enum.TryParse<Side>(s.Side, true, out var side) ? side : null,
                 PerformedAt = s.PerformedAt
             }).ToList()
         };

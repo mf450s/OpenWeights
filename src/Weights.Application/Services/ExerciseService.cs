@@ -19,6 +19,7 @@ public class ExerciseService(IUnitOfWork unitOfWork) : IExerciseService
             Id = e.Id,
             Name = e.Name,
             TrackType = e.TrackType.ToString(),
+            Laterality = e.Laterality.ToString(),
             Muscles = e.ExerciseMuscles.Select(em => new ExerciseMuscleDto
             {
                 Id = em.Muscle.Id,
@@ -40,6 +41,7 @@ public class ExerciseService(IUnitOfWork unitOfWork) : IExerciseService
             Id = exercise.Id,
             Name = exercise.Name,
             TrackType = exercise.TrackType.ToString(),
+            Laterality = exercise.Laterality.ToString(),
             Muscles = exercise.ExerciseMuscles.Select(em => new ExerciseMuscleDto
             {
                 Id = em.Muscle.Id,
