@@ -12,6 +12,7 @@ public static class DependencyInjection
         services.AddScoped<IExerciseService, ExerciseService>();
         services.AddScoped<ITemplateService, TemplateService>();
         services.AddScoped<ISessionService, SessionService>();
+        services.AddScoped<IMuscleService, MuscleService>();
 
         return services;
     }

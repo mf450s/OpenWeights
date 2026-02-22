@@ -1,35 +1,65 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Weights.Application.DTOs.Common;
 using Weights.Application.DTOs.Exercises;
 using Weights.Application.Interfaces;
 
 namespace Weights.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/exercises")]
 [Authorize]
 public class ExercisesController(IExerciseService exerciseService) : ControllerBase
 {
     private readonly IExerciseService _exerciseService = exerciseService;
 
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<ExerciseResponse>>> GetAll([FromQuery] int? muscleId, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(PagedResponse<ExerciseResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedResponse<ExerciseResponse>>> GetAll(
+        [FromQuery] int? muscleId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
-        var exercises = await _exerciseService.GetAllAsync(muscleId, cancellationToken);
-        return Ok(exercises);
+        var result = await _exerciseService.GetAllAsync(muscleId, page, pageSize, cancellationToken);
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ExerciseResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ExerciseResponse>> GetById(int id, CancellationToken cancellationToken)
     {
         var exercise = await _exerciseService.GetByIdAsync(id, cancellationToken);
-        
+
         if (exercise == null)
-            return NotFound();
+            return Problem(detail: $"Exercise {id} not found.", statusCode: StatusCodes.Status404NotFound, title: "Not Found");
 
         return Ok(exercise);
+    }
+
+    [HttpGet("{id}/history")]
+    [ProducesResponseType(typeof(ExerciseHistoryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ExerciseHistoryResponse>> GetHistory(
+        int id,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = GetUserId();
+        var result = await _exerciseService.GetHistoryAsync(id, userId, page, pageSize, cancellationToken);
+
+        if (result == null)
+            return Problem(detail: $"Exercise {id} not found.", statusCode: StatusCodes.Status404NotFound, title: "Not Found");
+
+        return Ok(result);
+    }
+
+    private Guid GetUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Guid.Parse(userIdClaim!);
     }
 }

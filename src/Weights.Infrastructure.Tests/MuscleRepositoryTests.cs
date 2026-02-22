@@ -57,24 +57,6 @@ public class MuscleRepositoryTests
     }
 
     [Fact]
-    public async Task GetByBodyPartAsync_ShouldReturnEmpty_WhenNullBodyPart()
-    {
-        // Arrange
-        var muscle1 = new Muscle { Id = 1, Name = "Biceps", BodyPart = "Arms" };
-        var muscle2 = new Muscle { Id = 2, Name = "Abs", BodyPart = null };
-        
-        _context.Muscles.AddRange(muscle1, muscle2);
-        await _context.SaveChangesAsync();
-
-        // Act
-        var result = await _repository.GetByBodyPartAsync(null!);
-
-        // Assert
-        result.Should().ContainSingle();
-        result.First().Name.Should().Be("Abs");
-    }
-
-    [Fact]
     public async Task GetByBodyPartAsync_ShouldBeCaseSensitive()
     {
         // Arrange

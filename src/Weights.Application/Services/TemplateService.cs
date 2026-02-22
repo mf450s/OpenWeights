@@ -22,6 +22,16 @@ public class TemplateService(IUnitOfWork unitOfWork) : ITemplateService
         });
     }
 
+    public async Task<TemplateResponse?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var template = await _unitOfWork.WorkoutTemplates.GetWithExercisesAsync(id, cancellationToken);
+
+        if (template == null)
+            return null;
+
+        return MapToResponse(template);
+    }
+
     public async Task<TemplateResponse> CreateAsync(Guid userId, CreateTemplateRequest request, CancellationToken cancellationToken = default)
     {
         var template = new WorkoutTemplate
@@ -36,7 +46,9 @@ public class TemplateService(IUnitOfWork unitOfWork) : ITemplateService
             ExerciseId = e.ExerciseId,
             OrderIndex = e.OrderIndex,
             TargetSets = e.TargetSets,
-            TargetReps = e.TargetReps,
+            TargetRepsMin = e.TargetRepsMin,
+            TargetRepsMax = e.TargetRepsMax,
+            IsAMRAP = e.IsAMRAP,
             TargetRPE = e.TargetRPE,
             RestSeconds = e.RestSeconds
         }).ToList();
@@ -44,49 +56,76 @@ public class TemplateService(IUnitOfWork unitOfWork) : ITemplateService
         await _unitOfWork.WorkoutTemplates.AddAsync(template, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Reload with exercises
         var created = await _unitOfWork.WorkoutTemplates.GetWithExercisesAsync(template.Id, cancellationToken);
-
-        return new TemplateResponse
-        {
-            Id = created!.Id,
-            Name = created.Name,
-            Description = created.Description,
-            Exercises = created.WorkoutTemplateExercises.Select(wte => new TemplateExerciseResponse
-            {
-                ExerciseId = wte.ExerciseId,
-                ExerciseName = wte.Exercise.Name,
-                OrderIndex = wte.OrderIndex,
-                TargetSets = wte.TargetSets,
-                TargetReps = wte.TargetReps,
-                TargetRPE = wte.TargetRPE,
-                RestSeconds = wte.RestSeconds
-            }).ToList()
-        };
+        return MapToResponse(created!);
     }
 
-    public async Task<TemplateResponse?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<TemplateResponse?> UpdateAsync(Guid userId, int id, UpdateTemplateRequest request, CancellationToken cancellationToken = default)
     {
         var template = await _unitOfWork.WorkoutTemplates.GetWithExercisesAsync(id, cancellationToken);
 
-        if (template == null)
+        if (template == null || template.UserId != userId || template.IsArchived)
             return null;
 
-        return new TemplateResponse
+        template.Name = request.Name;
+        template.Description = request.Description;
+        template.UpdatedAt = DateTime.UtcNow;
+
+        // Replace exercises
+        template.WorkoutTemplateExercises = request.Exercises.Select(e => new WorkoutTemplateExercise
         {
-            Id = template.Id,
-            Name = template.Name,
-            Description = template.Description,
-            Exercises = template.WorkoutTemplateExercises.Select(wte => new TemplateExerciseResponse
-            {
-                ExerciseId = wte.ExerciseId,
-                ExerciseName = wte.Exercise.Name,
-                OrderIndex = wte.OrderIndex,
-                TargetSets = wte.TargetSets,
-                TargetReps = wte.TargetReps,
-                TargetRPE = wte.TargetRPE,
-                RestSeconds = wte.RestSeconds
-            }).ToList()
-        };
+            ExerciseId = e.ExerciseId,
+            OrderIndex = e.OrderIndex,
+            TargetSets = e.TargetSets,
+            TargetRepsMin = e.TargetRepsMin,
+            TargetRepsMax = e.TargetRepsMax,
+            IsAMRAP = e.IsAMRAP,
+            TargetRPE = e.TargetRPE,
+            RestSeconds = e.RestSeconds
+        }).ToList();
+
+        await _unitOfWork.WorkoutTemplates.UpdateAsync(template, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var updated = await _unitOfWork.WorkoutTemplates.GetWithExercisesAsync(id, cancellationToken);
+        return MapToResponse(updated!);
     }
+
+    public async Task<bool> ArchiveAsync(Guid userId, int id, CancellationToken cancellationToken = default)
+    {
+        var template = await _unitOfWork.WorkoutTemplates.GetByIdAsync(id, cancellationToken);
+
+        if (template == null || template.UserId != userId)
+            return false;
+
+        template.IsArchived = true;
+        template.UpdatedAt = DateTime.UtcNow;
+
+        await _unitOfWork.WorkoutTemplates.UpdateAsync(template, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
+
+    private static TemplateResponse MapToResponse(WorkoutTemplate template) => new()
+    {
+        Id = template.Id,
+        Name = template.Name,
+        Description = template.Description,
+        IsArchived = template.IsArchived,
+        UpdatedAt = template.UpdatedAt,
+        Exercises = template.WorkoutTemplateExercises.Select(wte => new TemplateExerciseResponse
+        {
+            Id = wte.Id,
+            ExerciseId = wte.ExerciseId,
+            ExerciseName = wte.Exercise?.Name ?? string.Empty,
+            OrderIndex = wte.OrderIndex,
+            TargetSets = wte.TargetSets,
+            TargetRepsMin = wte.TargetRepsMin,
+            TargetRepsMax = wte.TargetRepsMax,
+            IsAMRAP = wte.IsAMRAP,
+            TargetRPE = wte.TargetRPE,
+            RestSeconds = wte.RestSeconds
+        }).OrderBy(e => e.OrderIndex).ToList()
+    };
 }

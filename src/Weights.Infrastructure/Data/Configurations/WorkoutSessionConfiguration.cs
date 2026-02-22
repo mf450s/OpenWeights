@@ -30,5 +30,8 @@ public class WorkoutSessionConfiguration : IEntityTypeConfiguration<WorkoutSessi
             .WithMany(wt => wt.WorkoutSessions)
             .HasForeignKey(ws => ws.WorkoutTemplateId)
             .IsRequired(false);
+
+        builder.HasIndex(ws => new { ws.UserId, ws.Date })
+            .HasDatabaseName("IX_WorkoutSessions_UserId_Date");
     }
 }

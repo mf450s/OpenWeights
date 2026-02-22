@@ -27,9 +27,13 @@ public class TemplateExerciseDto
     [Range(1, 100)]
     public int TargetSets { get; set; }
 
-    [Required]
-    [StringLength(50)]
-    public string TargetReps { get; set; } = string.Empty;
+    [Range(1, 9999)]
+    public int? TargetRepsMin { get; set; }
+
+    [Range(1, 9999)]
+    public int? TargetRepsMax { get; set; }
+
+    public bool IsAMRAP { get; set; } = false;
 
     [Range(0, 10)]
     public decimal? TargetRPE { get; set; }

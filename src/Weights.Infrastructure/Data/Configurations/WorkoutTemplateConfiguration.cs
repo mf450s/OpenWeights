@@ -21,6 +21,9 @@ public class WorkoutTemplateConfiguration : IEntityTypeConfiguration<WorkoutTemp
             .IsRequired()
             .HasDefaultValue(false);
 
+        builder.Property(wt => wt.UpdatedAt)
+            .IsRequired(false);
+
         builder.HasOne(wt => wt.User)
             .WithMany(u => u.WorkoutTemplates)
             .HasForeignKey(wt => wt.UserId);

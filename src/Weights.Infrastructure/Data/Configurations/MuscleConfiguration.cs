@@ -18,6 +18,7 @@ public class MuscleConfiguration : IEntityTypeConfiguration<Muscle>
             .IsUnique();
 
         builder.Property(m => m.BodyPart)
+            .IsRequired()
             .HasMaxLength(50);
     }
 }

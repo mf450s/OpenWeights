@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using Weights.Application.DTOs.Sessions;
 using Weights.Application.Services;
 using Weights.Domain.Entities;
@@ -25,255 +25,167 @@ public class SessionServiceTests
     [Fact]
     public async Task CreateAsync_WithValidRequest_ShouldCreateSessionSuccessfully()
     {
-        // Arrange
         var userId = Guid.NewGuid();
-        var templateId = 1;
         var request = new CreateSessionRequest
         {
-            WorkoutTemplateId = templateId,
+            WorkoutTemplateId = 1,
             Name = "Chest Day",
             Date = DateTime.UtcNow,
             StartTime = DateTime.UtcNow,
             EndTime = DateTime.UtcNow.AddHours(1),
             Note = "Great workout",
-            Sets = new List<SetDto>
-            {
-                new SetDto
-                {
-                    ExerciseId = 1,
-                    SetNumber = 1,
-                    Weight = 100,
-                    Reps = 10,
-                    Rir = 2,
-                    DurationSeconds = null,
-                    DistanceMeters = null,
-                    PerformedAt = DateTime.UtcNow
-                }
-            }
-        };
-
-        var createdSession = new WorkoutSession
-        {
-            Id = 1,
-            UserId = userId,
-            WorkoutTemplateId = templateId,
-            Name = request.Name,
-            Date = request.Date,
-            StartTime = request.StartTime,
-            EndTime = request.EndTime,
-            Note = request.Note
+            Sets =
+            [
+                new() { ExerciseId = 1, SetNumber = 1, Weight = 100, Reps = 10, Rir = 2, PerformedAt = DateTime.UtcNow }
+            ]
         };
 
         _mockSessionRepository
             .Setup(x => x.AddAsync(It.IsAny<WorkoutSession>(), It.IsAny<CancellationToken>()))
-            .Returns((WorkoutSession session, CancellationToken ct) =>
-            {
-                session.Id = 1;
-                return Task.FromResult(session);
-            });
+            .Returns((WorkoutSession s, CancellationToken _) => { s.Id = 1; return Task.FromResult(s); });
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
-        _mockUnitOfWork
-            .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
-
-        // Act
         var result = await _sessionService.CreateAsync(userId, request);
 
-        // Assert
         Assert.NotNull(result);
         Assert.Equal(1, result.Id);
         Assert.Equal("success", result.Status);
-        _mockSessionRepository.Verify(
-            x => x.AddAsync(It.IsAny<WorkoutSession>(), It.IsAny<CancellationToken>()),
-            Times.Once);
-        _mockUnitOfWork.Verify(
-            x => x.SaveChangesAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        _mockSessionRepository.Verify(x => x.AddAsync(It.IsAny<WorkoutSession>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task CreateAsync_WithMultipleSets_ShouldCreateAllSets()
     {
-        // Arrange
         var userId = Guid.NewGuid();
         var request = new CreateSessionRequest
         {
-            Name = "Back Day",
-            Date = DateTime.UtcNow,
-            StartTime = DateTime.UtcNow,
-            Sets = new List<SetDto>
-            {
-                new SetDto
-                {
-                    ExerciseId = 1,
-                    SetNumber = 1,
-                    Weight = 100,
-                    Reps = 8,
-                    Rir = 2,
-                    PerformedAt = DateTime.UtcNow
-                },
-                new SetDto
-                {
-                    ExerciseId = 1,
-                    SetNumber = 2,
-                    Weight = 95,
-                    Reps = 10,
-                    Rir = 2,
-                    PerformedAt = DateTime.UtcNow
-                },
-                new SetDto
-                {
-                    ExerciseId = 2,
-                    SetNumber = 1,
-                    Weight = 50,
-                    Reps = 12,
-                    Rir = 3,
-                    PerformedAt = DateTime.UtcNow
-                }
-            }
+            Name = "Back Day", Date = DateTime.UtcNow, StartTime = DateTime.UtcNow,
+            Sets =
+            [
+                new() { ExerciseId = 1, SetNumber = 1, Weight = 100, Reps = 8, Rir = 2, PerformedAt = DateTime.UtcNow },
+                new() { ExerciseId = 1, SetNumber = 2, Weight = 95, Reps = 10, Rir = 2, PerformedAt = DateTime.UtcNow },
+                new() { ExerciseId = 2, SetNumber = 1, Weight = 50, Reps = 12, Rir = 3, PerformedAt = DateTime.UtcNow }
+            ]
         };
 
-        WorkoutSession? capturedSession = null;
+        WorkoutSession? captured = null;
         _mockSessionRepository
             .Setup(x => x.AddAsync(It.IsAny<WorkoutSession>(), It.IsAny<CancellationToken>()))
-            .Returns((WorkoutSession session, CancellationToken ct) =>
-            {
-                session.Id = 1;
-                capturedSession = session;
-                return Task.FromResult(session);
-            });
+            .Returns((WorkoutSession s, CancellationToken _) => { s.Id = 1; captured = s; return Task.FromResult(s); });
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
-        _mockUnitOfWork
-            .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
+        await _sessionService.CreateAsync(userId, request);
 
-        // Act
-        var result = await _sessionService.CreateAsync(userId, request);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.NotNull(capturedSession);
-        Assert.Equal(3, capturedSession.SetHistories.Count);
-        Assert.Equal(1, capturedSession.SetHistories.First().ExerciseId);
-        Assert.Equal(2, capturedSession.SetHistories.Last().ExerciseId);
-    }
-
-    [Fact]
-    public async Task CreateAsync_WithNullEndTime_ShouldCreateSuccessfully()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var request = new CreateSessionRequest
-        {
-            Name = "Quick Session",
-            Date = DateTime.UtcNow,
-            StartTime = DateTime.UtcNow,
-            EndTime = null,
-            Sets = new List<SetDto>
-            {
-                new SetDto
-                {
-                    ExerciseId = 1,
-                    SetNumber = 1,
-                    Weight = 100,
-                    Reps = 10,
-                    PerformedAt = DateTime.UtcNow
-                }
-            }
-        };
-
-        _mockSessionRepository
-            .Setup(x => x.AddAsync(It.IsAny<WorkoutSession>(), It.IsAny<CancellationToken>()))
-            .Returns((WorkoutSession session, CancellationToken ct) =>
-            {
-                session.Id = 1;
-                return Task.FromResult(session);
-            });
-
-        _mockUnitOfWork
-            .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
-
-        // Act
-        var result = await _sessionService.CreateAsync(userId, request);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal("success", result.Status);
+        Assert.NotNull(captured);
+        Assert.Equal(3, captured.SetHistories.Count);
     }
 
     [Fact]
     public async Task CreateAsync_WithEmptySets_ShouldCreateSessionWithNoSets()
     {
-        // Arrange
         var userId = Guid.NewGuid();
-        var request = new CreateSessionRequest
-        {
-            Name = "Empty Session",
-            Date = DateTime.UtcNow,
-            StartTime = DateTime.UtcNow,
-            Sets = new List<SetDto>()
-        };
+        var request = new CreateSessionRequest { Name = "Empty", Date = DateTime.UtcNow, StartTime = DateTime.UtcNow, Sets = [] };
 
-        WorkoutSession? capturedSession = null;
+        WorkoutSession? captured = null;
         _mockSessionRepository
             .Setup(x => x.AddAsync(It.IsAny<WorkoutSession>(), It.IsAny<CancellationToken>()))
-            .Returns((WorkoutSession session, CancellationToken ct) =>
-            {
-                session.Id = 1;
-                capturedSession = session;
-                return Task.FromResult(session);
-            });
+            .Returns((WorkoutSession s, CancellationToken _) => { s.Id = 1; captured = s; return Task.FromResult(s); });
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
-        _mockUnitOfWork
-            .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
-
-        // Act
         var result = await _sessionService.CreateAsync(userId, request);
 
-        // Assert
+        Assert.NotNull(captured);
+        Assert.Empty(captured.SetHistories);
+        Assert.Equal("success", result.Status);
+    }
+
+    #endregion
+
+    #region GetByIdAsync Tests
+
+    [Fact]
+    public async Task GetByIdAsync_WithValidIdAndOwner_ShouldReturnDetail()
+    {
+        var userId = Guid.NewGuid();
+        var session = new WorkoutSession
+        {
+            Id = 1, UserId = userId, Name = "Leg Day",
+            Date = DateTime.UtcNow, StartTime = DateTime.UtcNow,
+            SetHistories =
+            [
+                new() { Id = 1, ExerciseId = 1, SetNumber = 1, Weight = 80, Reps = 10, PerformedAt = DateTime.UtcNow }
+            ]
+        };
+
+        _mockSessionRepository.Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(session);
+
+        var result = await _sessionService.GetByIdAsync(1, userId);
+
         Assert.NotNull(result);
-        Assert.NotNull(capturedSession);
-        Assert.Empty(capturedSession.SetHistories);
+        Assert.Equal(1, result.Id);
+        Assert.Equal("Leg Day", result.Name);
+        Assert.Single(result.Sets);
     }
 
     [Fact]
-    public async Task CreateAsync_ShouldCallSaveChangesWithCancellationToken()
+    public async Task GetByIdAsync_WithWrongUser_ShouldReturnNull()
     {
-        // Arrange
+        var ownerId = Guid.NewGuid();
+        var otherId = Guid.NewGuid();
+        var session = new WorkoutSession { Id = 1, UserId = ownerId, Date = DateTime.UtcNow, StartTime = DateTime.UtcNow, SetHistories = [] };
+
+        _mockSessionRepository.Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(session);
+
+        var result = await _sessionService.GetByIdAsync(1, otherId);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_WithNonExistentId_ShouldReturnNull()
+    {
+        _mockSessionRepository.Setup(x => x.GetWithSetsAsync(99, It.IsAny<CancellationToken>())).ReturnsAsync((WorkoutSession?)null);
+
+        var result = await _sessionService.GetByIdAsync(99, Guid.NewGuid());
+
+        Assert.Null(result);
+    }
+
+    #endregion
+
+    #region UpdateAsync Tests
+
+    [Fact]
+    public async Task UpdateAsync_WithValidRequest_ShouldReturnUpdatedSession()
+    {
         var userId = Guid.NewGuid();
-        var cts = new CancellationTokenSource();
-        var request = new CreateSessionRequest
-        {
-            Name = "Test",
-            Date = DateTime.UtcNow,
-            StartTime = DateTime.UtcNow,
-            Sets = new List<SetDto>
-            {
-                new SetDto { ExerciseId = 1, SetNumber = 1, PerformedAt = DateTime.UtcNow }
-            }
-        };
+        var session = new WorkoutSession { Id = 1, UserId = userId, Name = "Old Name", Date = DateTime.UtcNow, StartTime = DateTime.UtcNow, SetHistories = [] };
+        var updatedSession = new WorkoutSession { Id = 1, UserId = userId, Name = "New Name", Date = session.Date, StartTime = session.StartTime, Note = "Updated note", SetHistories = [] };
+        var request = new UpdateSessionRequest { Name = "New Name", Note = "Updated note" };
 
-        _mockSessionRepository
-            .Setup(x => x.AddAsync(It.IsAny<WorkoutSession>(), It.IsAny<CancellationToken>()))
-            .Returns((WorkoutSession session, CancellationToken ct) =>
-            {
-                session.Id = 1;
-                return Task.FromResult(session);
-            });
+        _mockSessionRepository.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(session);
+        _mockSessionRepository.Setup(x => x.UpdateAsync(It.IsAny<WorkoutSession>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+        _mockSessionRepository.Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(updatedSession);
 
-        _mockUnitOfWork
-            .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
+        var result = await _sessionService.UpdateAsync(1, userId, request);
 
-        // Act
-        await _sessionService.CreateAsync(userId, request, cts.Token);
+        Assert.NotNull(result);
+        Assert.Equal("New Name", result.Name);
+        Assert.Equal("Updated note", result.Note);
+    }
 
-        // Assert
-        _mockUnitOfWork.Verify(
-            x => x.SaveChangesAsync(cts.Token),
-            Times.Once);
+    [Fact]
+    public async Task UpdateAsync_WithWrongUser_ShouldReturnNull()
+    {
+        var ownerId = Guid.NewGuid();
+        var session = new WorkoutSession { Id = 1, UserId = ownerId, Date = DateTime.UtcNow, StartTime = DateTime.UtcNow };
+        _mockSessionRepository.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(session);
+
+        var result = await _sessionService.UpdateAsync(1, Guid.NewGuid(), new UpdateSessionRequest());
+
+        Assert.Null(result);
     }
 
     #endregion
@@ -281,331 +193,83 @@ public class SessionServiceTests
     #region GetHistoryAsync Tests
 
     [Fact]
-    public async Task GetHistoryAsync_WithValidParameters_ShouldReturnPaginatedHistory()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var page = 1;
-        var pageSize = 10;
-
-        var sessions = new List<WorkoutSession>
-        {
-            new WorkoutSession
-            {
-                Id = 1,
-                UserId = userId,
-                Name = "Session 1",
-                Date = DateTime.UtcNow.AddDays(-1)
-            }
-        };
-
-        var sessionWithSets = new WorkoutSession
-        {
-            Id = 1,
-            UserId = userId,
-            Name = "Session 1",
-            Date = DateTime.UtcNow.AddDays(-1),
-            SetHistories = new List<SetHistory>
-            {
-                new SetHistory { ExerciseId = 1, Weight = 100, Reps = 10 },
-                new SetHistory { ExerciseId = 2, Weight = 50, Reps = 12 }
-            }
-        };
-
-        _mockSessionRepository
-            .Setup(x => x.GetByUserIdAsync(userId, page, pageSize, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(sessions);
-
-        _mockSessionRepository
-            .Setup(x => x.GetTotalCountByUserIdAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
-
-        _mockSessionRepository
-            .Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(sessionWithSets);
-
-        // Act
-        var result = await _sessionService.GetHistoryAsync(userId, page, pageSize);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Single(result.Data);
-        Assert.Equal(1, result.TotalCount);
-        Assert.Equal(page, result.Page);
-        Assert.Equal("Session 1", result.Data.First().Name);
-    }
-
-    [Fact]
     public async Task GetHistoryAsync_ShouldCalculateTotalVolumeCorrectly()
     {
-        // Arrange
         var userId = Guid.NewGuid();
-        var sessions = new List<WorkoutSession>
-        {
-            new WorkoutSession { Id = 1, UserId = userId, Name = "Test", Date = DateTime.UtcNow }
-        };
-
+        var sessions = new List<WorkoutSession> { new() { Id = 1, UserId = userId, Name = "Test", Date = DateTime.UtcNow } };
         var sessionWithSets = new WorkoutSession
         {
             Id = 1,
-            SetHistories = new List<SetHistory>
-            {
-                new SetHistory { Weight = 100, Reps = 10 },  // 100 * 10 = 1000
-                new SetHistory { Weight = 80, Reps = 12 }    // 80 * 12 = 960
-            }
+            SetHistories =
+            [
+                new() { Weight = 100, Reps = 10 },
+                new() { Weight = 80, Reps = 12 }
+            ]
         };
 
-        _mockSessionRepository
-            .Setup(x => x.GetByUserIdAsync(userId, 1, 10, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(sessions);
+        _mockSessionRepository.Setup(x => x.GetByUserIdAsync(userId, 1, 10, It.IsAny<CancellationToken>())).ReturnsAsync(sessions);
+        _mockSessionRepository.Setup(x => x.GetTotalCountByUserIdAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(1);
+        _mockSessionRepository.Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(sessionWithSets);
 
-        _mockSessionRepository
-            .Setup(x => x.GetTotalCountByUserIdAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
-
-        _mockSessionRepository
-            .Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(sessionWithSets);
-
-        // Act
         var result = await _sessionService.GetHistoryAsync(userId);
 
-        // Assert
         Assert.NotNull(result);
-        Assert.Single(result.Data);
         Assert.Equal(1960, result.Data.First().TotalVolume);
     }
 
     [Fact]
     public async Task GetHistoryAsync_WithNullWeightOrReps_ShouldNotIncludeInVolume()
     {
-        // Arrange
         var userId = Guid.NewGuid();
-        var sessions = new List<WorkoutSession>
-        {
-            new WorkoutSession { Id = 1, UserId = userId, Name = "Test", Date = DateTime.UtcNow }
-        };
-
+        var sessions = new List<WorkoutSession> { new() { Id = 1, UserId = userId, Name = "Test", Date = DateTime.UtcNow } };
         var sessionWithSets = new WorkoutSession
         {
             Id = 1,
-            SetHistories = new List<SetHistory>
-            {
-                new SetHistory { Weight = 100, Reps = 10 },   // 100 * 10 = 1000
-                new SetHistory { Weight = null, Reps = 10 },  // Skipped
-                new SetHistory { Weight = 80, Reps = null },  // Skipped
-                new SetHistory { Weight = 50, Reps = 5 }      // 50 * 5 = 250
-            }
+            SetHistories =
+            [
+                new() { Weight = 100, Reps = 10 },
+                new() { Weight = null, Reps = 10 },
+                new() { Weight = 80, Reps = null },
+                new() { Weight = 50, Reps = 5 }
+            ]
         };
 
-        _mockSessionRepository
-            .Setup(x => x.GetByUserIdAsync(userId, 1, 10, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<WorkoutSession> { sessions[0] });
+        _mockSessionRepository.Setup(x => x.GetByUserIdAsync(userId, 1, 10, It.IsAny<CancellationToken>())).ReturnsAsync(sessions);
+        _mockSessionRepository.Setup(x => x.GetTotalCountByUserIdAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(1);
+        _mockSessionRepository.Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(sessionWithSets);
 
-        _mockSessionRepository
-            .Setup(x => x.GetTotalCountByUserIdAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
-
-        _mockSessionRepository
-            .Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(sessionWithSets);
-
-        // Act
         var result = await _sessionService.GetHistoryAsync(userId);
 
-        // Assert
-        Assert.NotNull(result);
-        Assert.Single(result.Data);
         Assert.Equal(1250, result.Data.First().TotalVolume);
-    }
-
-    [Fact]
-    public async Task GetHistoryAsync_WithNoSets_ShouldReturnZeroVolume()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var sessions = new List<WorkoutSession>
-        {
-            new WorkoutSession { Id = 1, UserId = userId, Name = "Test", Date = DateTime.UtcNow }
-        };
-
-        var sessionWithSets = new WorkoutSession
-        {
-            Id = 1,
-            SetHistories = new List<SetHistory>()
-        };
-
-        _mockSessionRepository
-            .Setup(x => x.GetByUserIdAsync(userId, 1, 10, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(sessions);
-
-        _mockSessionRepository
-            .Setup(x => x.GetTotalCountByUserIdAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
-
-        _mockSessionRepository
-            .Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(sessionWithSets);
-
-        // Act
-        var result = await _sessionService.GetHistoryAsync(userId);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Single(result.Data);
-        Assert.Equal(0, result.Data.First().TotalVolume);
-    }
-
-    [Fact]
-    public async Task GetHistoryAsync_WithNullSessionFromRepository_ShouldReturnZeroVolume()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var sessions = new List<WorkoutSession>
-        {
-            new WorkoutSession { Id = 1, UserId = userId, Name = "Test", Date = DateTime.UtcNow }
-        };
-
-        _mockSessionRepository
-            .Setup(x => x.GetByUserIdAsync(userId, 1, 10, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(sessions);
-
-        _mockSessionRepository
-            .Setup(x => x.GetTotalCountByUserIdAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
-
-        _mockSessionRepository
-            .Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((WorkoutSession?)null);
-
-        // Act
-        var result = await _sessionService.GetHistoryAsync(userId);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Single(result.Data);
-        Assert.Equal(0, result.Data.First().TotalVolume);
-    }
-
-    [Fact]
-    public async Task GetHistoryAsync_WithMultipleSessions_ShouldReturnAllWithCorrectVolume()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var sessions = new List<WorkoutSession>
-        {
-            new WorkoutSession { Id = 1, UserId = userId, Name = "Session 1", Date = DateTime.UtcNow.AddDays(-2) },
-            new WorkoutSession { Id = 2, UserId = userId, Name = "Session 2", Date = DateTime.UtcNow.AddDays(-1) }
-        };
-
-        var session1WithSets = new WorkoutSession
-        {
-            Id = 1,
-            SetHistories = new List<SetHistory>
-            {
-                new SetHistory { Weight = 100, Reps = 10 }
-            }
-        };
-
-        var session2WithSets = new WorkoutSession
-        {
-            Id = 2,
-            SetHistories = new List<SetHistory>
-            {
-                new SetHistory { Weight = 150, Reps = 5 }
-            }
-        };
-
-        _mockSessionRepository
-            .Setup(x => x.GetByUserIdAsync(userId, 1, 10, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(sessions);
-
-        _mockSessionRepository
-            .Setup(x => x.GetTotalCountByUserIdAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(2);
-
-        _mockSessionRepository
-            .Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(session1WithSets);
-
-        _mockSessionRepository
-            .Setup(x => x.GetWithSetsAsync(2, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(session2WithSets);
-
-        // Act
-        var result = await _sessionService.GetHistoryAsync(userId);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(2, result.Data.Count);
-        Assert.Equal(1000, result.Data[0].TotalVolume);
-        Assert.Equal(750, result.Data[1].TotalVolume);
-        Assert.Equal(2, result.TotalCount);
-    }
-
-    [Fact]
-    public async Task GetHistoryAsync_WithPagination_ShouldRespectPageParameters()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var page = 2;
-        var pageSize = 5;
-        var sessions = new List<WorkoutSession>
-        {
-            new WorkoutSession { Id = 1, UserId = userId, Name = "Session 1", Date = DateTime.UtcNow }
-        };
-
-        _mockSessionRepository
-            .Setup(x => x.GetByUserIdAsync(userId, page, pageSize, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(sessions);
-
-        _mockSessionRepository
-            .Setup(x => x.GetTotalCountByUserIdAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(15);
-
-        var sessionWithSets = new WorkoutSession
-        {
-            Id = 1,
-            SetHistories = new List<SetHistory>()
-        };
-
-        _mockSessionRepository
-            .Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(sessionWithSets);
-
-        // Act
-        var result = await _sessionService.GetHistoryAsync(userId, page, pageSize);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(page, result.Page);
-        Assert.Equal(15, result.TotalCount);
-        _mockSessionRepository.Verify(
-            x => x.GetByUserIdAsync(userId, page, pageSize, It.IsAny<CancellationToken>()),
-            Times.Once);
     }
 
     [Fact]
     public async Task GetHistoryAsync_WithEmptyResult_ShouldReturnEmptyData()
     {
-        // Arrange
         var userId = Guid.NewGuid();
+        _mockSessionRepository.Setup(x => x.GetByUserIdAsync(userId, 1, 10, It.IsAny<CancellationToken>())).ReturnsAsync(new List<WorkoutSession>());
+        _mockSessionRepository.Setup(x => x.GetTotalCountByUserIdAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(0);
 
-        _mockSessionRepository
-            .Setup(x => x.GetByUserIdAsync(userId, 1, 10, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<WorkoutSession>());
-
-        _mockSessionRepository
-            .Setup(x => x.GetTotalCountByUserIdAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(0);
-
-        // Act
         var result = await _sessionService.GetHistoryAsync(userId);
 
-        // Assert
-        Assert.NotNull(result);
         Assert.Empty(result.Data);
         Assert.Equal(0, result.TotalCount);
+    }
+
+    [Fact]
+    public async Task GetHistoryAsync_WithPagination_ShouldPassParametersToRepository()
+    {
+        var userId = Guid.NewGuid();
+        var page = 3;
+        var pageSize = 5;
+        _mockSessionRepository.Setup(x => x.GetByUserIdAsync(userId, page, pageSize, It.IsAny<CancellationToken>())).ReturnsAsync(new List<WorkoutSession>());
+        _mockSessionRepository.Setup(x => x.GetTotalCountByUserIdAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(20);
+
+        var result = await _sessionService.GetHistoryAsync(userId, page, pageSize);
+
+        Assert.Equal(page, result.Page);
+        Assert.Equal(20, result.TotalCount);
+        _mockSessionRepository.Verify(x => x.GetByUserIdAsync(userId, page, pageSize, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     #endregion

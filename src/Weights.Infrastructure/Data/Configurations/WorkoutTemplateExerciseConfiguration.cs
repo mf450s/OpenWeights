@@ -24,9 +24,15 @@ public class WorkoutTemplateExerciseConfiguration : IEntityTypeConfiguration<Wor
         builder.Property(wte => wte.TargetSets)
             .IsRequired();
 
-        builder.Property(wte => wte.TargetReps)
+        builder.Property(wte => wte.TargetRepsMin)
+            .IsRequired(false);
+
+        builder.Property(wte => wte.TargetRepsMax)
+            .IsRequired(false);
+
+        builder.Property(wte => wte.IsAMRAP)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasDefaultValue(false);
 
         builder.Property(wte => wte.TargetRPE)
             .HasPrecision(3, 1);
