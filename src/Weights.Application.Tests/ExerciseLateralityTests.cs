@@ -13,7 +13,7 @@ public class ExerciseLateralityTests
         var exercise = new Exercise
         {
             Name = "Bench Press",
-            TrackType = TrackType.Reps
+            TrackType = TrackType.WeightReps
         };
 
         // Assert
@@ -27,7 +27,7 @@ public class ExerciseLateralityTests
         var exercise = new Exercise
         {
             Name = "Dumbbell Curl",
-            TrackType = TrackType.Reps,
+            TrackType = TrackType.WeightReps,
             Laterality = Laterality.Unilateral
         };
 

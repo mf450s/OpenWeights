@@ -29,7 +29,7 @@ public class SetValidatorTests
             Id = 1,
             Name = "Dumbbell Curl",
             Laterality = Laterality.Unilateral,
-            TrackType = TrackType.Reps
+            TrackType = TrackType.WeightReps
         };
 
         _unitOfWorkMock.Setup(x => x.Exercises.GetByIdAsync(1, It.IsAny<CancellationToken>()))
@@ -61,7 +61,7 @@ public class SetValidatorTests
             Id = 1,
             Name = "Dumbbell Curl",
             Laterality = Laterality.Unilateral,
-            TrackType = TrackType.Reps
+            TrackType = TrackType.WeightReps
         };
 
         _unitOfWorkMock.Setup(x => x.Exercises.GetByIdAsync(1, It.IsAny<CancellationToken>()))
@@ -93,7 +93,7 @@ public class SetValidatorTests
             Id = 1,
             Name = "Dumbbell Curl",
             Laterality = Laterality.Unilateral,
-            TrackType = TrackType.Reps
+            TrackType = TrackType.WeightReps
         };
 
         _unitOfWorkMock.Setup(x => x.Exercises.GetByIdAsync(1, It.IsAny<CancellationToken>()))
@@ -125,7 +125,7 @@ public class SetValidatorTests
             Id = 1,
             Name = "Bench Press",
             Laterality = Laterality.Bilateral,
-            TrackType = TrackType.Reps
+            TrackType = TrackType.WeightReps
         };
 
         _unitOfWorkMock.Setup(x => x.Exercises.GetByIdAsync(1, It.IsAny<CancellationToken>()))
@@ -157,7 +157,7 @@ public class SetValidatorTests
             Id = 1,
             Name = "Bench Press",
             Laterality = Laterality.Bilateral,
-            TrackType = TrackType.Reps
+            TrackType = TrackType.WeightReps
         };
 
         _unitOfWorkMock.Setup(x => x.Exercises.GetByIdAsync(1, It.IsAny<CancellationToken>()))
@@ -189,7 +189,7 @@ public class SetValidatorTests
             Id = 1,
             Name = "Dumbbell Curl",
             Laterality = Laterality.Unilateral,
-            TrackType = TrackType.Reps
+            TrackType = TrackType.WeightReps
         };
 
         _unitOfWorkMock.Setup(x => x.Exercises.GetByIdAsync(1, It.IsAny<CancellationToken>()))
