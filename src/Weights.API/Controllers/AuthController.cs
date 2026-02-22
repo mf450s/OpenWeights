@@ -5,14 +5,14 @@ using Weights.Application.Interfaces;
 namespace Weights.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/auth")]
 public class AuthController(IAuthService authService) : ControllerBase
 {
     private readonly IAuthService _authService = authService;
 
     [HttpPost("register")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserResponse>> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
         try
@@ -22,13 +22,13 @@ public class AuthController(IAuthService authService) : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new { error = ex.Message });
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest, title: "Registration failed");
         }
     }
 
     [HttpPost("login")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
         try
@@ -38,7 +38,23 @@ public class AuthController(IAuthService authService) : ControllerBase
         }
         catch (UnauthorizedAccessException)
         {
-            return Unauthorized(new { error = "Invalid credentials" });
+            return Problem(detail: "Invalid credentials", statusCode: StatusCodes.Status401Unauthorized, title: "Authentication failed");
+        }
+    }
+
+    [HttpPost("refresh")]
+    [ProducesResponseType(typeof(RefreshTokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<RefreshTokenResponse>> Refresh([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _authService.RefreshAsync(request, cancellationToken);
+            return Ok(result);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status401Unauthorized, title: "Token refresh failed");
         }
     }
 }
