@@ -10,7 +10,12 @@ public class WorkoutTemplateExercise : Entity<int>
 
     public int OrderIndex { get; set; }
     public int TargetSets { get; set; }
-    public string TargetReps { get; set; } = string.Empty;
+    public int? TargetRepsMin { get; set; }
+    public int? TargetRepsMax { get; set; }
+    public bool IsAMRAP { get; set; } = false;
     public decimal? TargetRPE { get; set; }
     public int? RestSeconds { get; set; }
+
+    // Navigation properties
+    public ICollection<SetHistory> SetHistories { get; set; } = new List<SetHistory>();
 }

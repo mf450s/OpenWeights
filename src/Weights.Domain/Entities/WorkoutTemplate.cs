@@ -8,6 +8,7 @@ public class WorkoutTemplate : Entity<int>
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public bool IsArchived { get; set; } = false;
+    public DateTime? UpdatedAt { get; set; }
 
     // Navigation properties
     public ICollection<WorkoutTemplateExercise> WorkoutTemplateExercises { get; set; } = new List<WorkoutTemplateExercise>();
