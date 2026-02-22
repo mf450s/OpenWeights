@@ -34,10 +34,10 @@ public class SessionServiceTests
             StartTime = DateTime.UtcNow,
             EndTime = DateTime.UtcNow.AddHours(1),
             Note = "Great workout",
-            Sets = new List<SetDto>
-            {
+            Sets =
+            [
                 new() { ExerciseId = 1, SetNumber = 1, Weight = 100, Reps = 10, Rir = 2, PerformedAt = DateTime.UtcNow }
-            }
+            ]
         };
 
         _mockSessionRepository
@@ -61,12 +61,12 @@ public class SessionServiceTests
         var request = new CreateSessionRequest
         {
             Name = "Back Day", Date = DateTime.UtcNow, StartTime = DateTime.UtcNow,
-            Sets = new List<SetDto>
-            {
+            Sets =
+            [
                 new() { ExerciseId = 1, SetNumber = 1, Weight = 100, Reps = 8, Rir = 2, PerformedAt = DateTime.UtcNow },
                 new() { ExerciseId = 1, SetNumber = 2, Weight = 95, Reps = 10, Rir = 2, PerformedAt = DateTime.UtcNow },
                 new() { ExerciseId = 2, SetNumber = 1, Weight = 50, Reps = 12, Rir = 3, PerformedAt = DateTime.UtcNow }
-            }
+            ]
         };
 
         WorkoutSession? captured = null;
@@ -85,7 +85,7 @@ public class SessionServiceTests
     public async Task CreateAsync_WithEmptySets_ShouldCreateSessionWithNoSets()
     {
         var userId = Guid.NewGuid();
-        var request = new CreateSessionRequest { Name = "Empty", Date = DateTime.UtcNow, StartTime = DateTime.UtcNow, Sets = new() };
+        var request = new CreateSessionRequest { Name = "Empty", Date = DateTime.UtcNow, StartTime = DateTime.UtcNow, Sets = [] };
 
         WorkoutSession? captured = null;
         _mockSessionRepository
@@ -112,10 +112,10 @@ public class SessionServiceTests
         {
             Id = 1, UserId = userId, Name = "Leg Day",
             Date = DateTime.UtcNow, StartTime = DateTime.UtcNow,
-            SetHistories = new List<SetHistory>
-            {
+            SetHistories =
+            [
                 new() { Id = 1, ExerciseId = 1, SetNumber = 1, Weight = 80, Reps = 10, PerformedAt = DateTime.UtcNow }
-            }
+            ]
         };
 
         _mockSessionRepository.Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(session);
@@ -133,7 +133,7 @@ public class SessionServiceTests
     {
         var ownerId = Guid.NewGuid();
         var otherId = Guid.NewGuid();
-        var session = new WorkoutSession { Id = 1, UserId = ownerId, Date = DateTime.UtcNow, StartTime = DateTime.UtcNow, SetHistories = new() };
+        var session = new WorkoutSession { Id = 1, UserId = ownerId, Date = DateTime.UtcNow, StartTime = DateTime.UtcNow, SetHistories = [] };
 
         _mockSessionRepository.Setup(x => x.GetWithSetsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(session);
 
@@ -160,8 +160,8 @@ public class SessionServiceTests
     public async Task UpdateAsync_WithValidRequest_ShouldReturnUpdatedSession()
     {
         var userId = Guid.NewGuid();
-        var session = new WorkoutSession { Id = 1, UserId = userId, Name = "Old Name", Date = DateTime.UtcNow, StartTime = DateTime.UtcNow, SetHistories = new() };
-        var updatedSession = new WorkoutSession { Id = 1, UserId = userId, Name = "New Name", Date = session.Date, StartTime = session.StartTime, Note = "Updated note", SetHistories = new() };
+        var session = new WorkoutSession { Id = 1, UserId = userId, Name = "Old Name", Date = DateTime.UtcNow, StartTime = DateTime.UtcNow, SetHistories = [] };
+        var updatedSession = new WorkoutSession { Id = 1, UserId = userId, Name = "New Name", Date = session.Date, StartTime = session.StartTime, Note = "Updated note", SetHistories = [] };
         var request = new UpdateSessionRequest { Name = "New Name", Note = "Updated note" };
 
         _mockSessionRepository.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(session);
@@ -200,11 +200,11 @@ public class SessionServiceTests
         var sessionWithSets = new WorkoutSession
         {
             Id = 1,
-            SetHistories = new List<SetHistory>
-            {
+            SetHistories =
+            [
                 new() { Weight = 100, Reps = 10 },
                 new() { Weight = 80, Reps = 12 }
-            }
+            ]
         };
 
         _mockSessionRepository.Setup(x => x.GetByUserIdAsync(userId, 1, 10, It.IsAny<CancellationToken>())).ReturnsAsync(sessions);
@@ -225,13 +225,13 @@ public class SessionServiceTests
         var sessionWithSets = new WorkoutSession
         {
             Id = 1,
-            SetHistories = new List<SetHistory>
-            {
+            SetHistories =
+            [
                 new() { Weight = 100, Reps = 10 },
                 new() { Weight = null, Reps = 10 },
                 new() { Weight = 80, Reps = null },
                 new() { Weight = 50, Reps = 5 }
-            }
+            ]
         };
 
         _mockSessionRepository.Setup(x => x.GetByUserIdAsync(userId, 1, 10, It.IsAny<CancellationToken>())).ReturnsAsync(sessions);
