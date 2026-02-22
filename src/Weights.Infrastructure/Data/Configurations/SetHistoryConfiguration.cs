@@ -18,6 +18,12 @@ public class SetHistoryConfiguration : IEntityTypeConfiguration<SetHistory>
             .WithMany(e => e.SetHistories)
             .HasForeignKey(sh => sh.ExerciseId);
 
+        builder.HasOne(sh => sh.WorkoutTemplateExercise)
+            .WithMany(wte => wte.SetHistories)
+            .HasForeignKey(sh => sh.WorkoutTemplateExerciseId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.Property(sh => sh.SetNumber)
             .IsRequired();
 
@@ -37,5 +43,8 @@ public class SetHistoryConfiguration : IEntityTypeConfiguration<SetHistory>
 
         builder.Property(sh => sh.PerformedAt)
             .IsRequired();
+
+        builder.HasIndex(sh => new { sh.WorkoutSessionId, sh.ExerciseId })
+            .HasDatabaseName("IX_SetHistories_WorkoutSessionId_ExerciseId");
     }
 }
