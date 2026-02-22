@@ -38,11 +38,35 @@ public class SessionService(IUnitOfWork unitOfWork) : ISessionService
         await _unitOfWork.WorkoutSessions.AddAsync(session, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new SessionResponse
-        {
-            Id = session.Id,
-            Status = "success"
-        };
+        return new SessionResponse { Id = session.Id, Status = "success" };
+    }
+
+    public async Task<SessionDetailResponse?> GetByIdAsync(int id, Guid userId, CancellationToken cancellationToken = default)
+    {
+        var session = await _unitOfWork.WorkoutSessions.GetWithSetsAsync(id, cancellationToken);
+
+        if (session == null || session.UserId != userId)
+            return null;
+
+        return MapToDetail(session);
+    }
+
+    public async Task<SessionDetailResponse?> UpdateAsync(int id, Guid userId, UpdateSessionRequest request, CancellationToken cancellationToken = default)
+    {
+        var session = await _unitOfWork.WorkoutSessions.GetByIdAsync(id, cancellationToken);
+
+        if (session == null || session.UserId != userId)
+            return null;
+
+        if (request.Name != null) session.Name = request.Name;
+        if (request.EndTime.HasValue) session.EndTime = request.EndTime;
+        if (request.Note != null) session.Note = request.Note;
+
+        await _unitOfWork.WorkoutSessions.UpdateAsync(session, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var updated = await _unitOfWork.WorkoutSessions.GetWithSetsAsync(id, cancellationToken);
+        return MapToDetail(updated!);
     }
 
     public async Task<SessionHistoryResponse> GetHistoryAsync(Guid userId, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
@@ -68,11 +92,32 @@ public class SessionService(IUnitOfWork unitOfWork) : ISessionService
             });
         }
 
-        return new SessionHistoryResponse
-        {
-            Data = data,
-            TotalCount = totalCount,
-            Page = page
-        };
+        return new SessionHistoryResponse { Data = data, TotalCount = totalCount, Page = page };
     }
+
+    private static SessionDetailResponse MapToDetail(WorkoutSession session) => new()
+    {
+        Id = session.Id,
+        Name = session.Name,
+        WorkoutTemplateId = session.WorkoutTemplateId,
+        Date = session.Date,
+        StartTime = session.StartTime,
+        EndTime = session.EndTime,
+        Note = session.Note,
+        Sets = session.SetHistories.Select(sh => new SessionSetResponse
+        {
+            Id = sh.Id,
+            ExerciseId = sh.ExerciseId,
+            ExerciseName = sh.Exercise?.Name ?? string.Empty,
+            SetNumber = sh.SetNumber,
+            Weight = sh.Weight,
+            Reps = sh.Reps,
+            RIR = sh.RIR,
+            DurationSeconds = sh.DurationSeconds,
+            DistanceMeters = sh.DistanceMeters,
+            Side = sh.Side?.ToString(),
+            WorkoutTemplateExerciseId = sh.WorkoutTemplateExerciseId,
+            PerformedAt = sh.PerformedAt
+        }).OrderBy(s => s.SetNumber).ToList()
+    };
 }

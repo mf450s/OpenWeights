@@ -5,6 +5,8 @@ namespace Weights.Application.Interfaces;
 public interface ITemplateService
 {
     Task<IEnumerable<WorkoutTemplateListResponse>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
-    Task<TemplateResponse> CreateAsync(Guid userId, CreateTemplateRequest request, CancellationToken cancellationToken = default);
     Task<TemplateResponse?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<TemplateResponse> CreateAsync(Guid userId, CreateTemplateRequest request, CancellationToken cancellationToken = default);
+    Task<TemplateResponse?> UpdateAsync(Guid userId, int id, UpdateTemplateRequest request, CancellationToken cancellationToken = default);
+    Task<bool> ArchiveAsync(Guid userId, int id, CancellationToken cancellationToken = default);
 }
