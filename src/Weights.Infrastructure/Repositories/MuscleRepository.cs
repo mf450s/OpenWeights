@@ -13,11 +13,4 @@ public class MuscleRepository(ApplicationDbContext context) : Repository<Muscle,
             .Where(m => m.BodyPart == bodyPart)
             .ToListAsync(cancellationToken);
     }
-
-    // public async Task<Muscle> DeleteAsync(Muscle muscle, CancellationToken cancellationToken = default)
-    // {
-    //     DbSet.Remove(muscle);
-    //     await Context.SaveChangesAsync(cancellationToken);
-    //     return muscle;
-    // }
 }
