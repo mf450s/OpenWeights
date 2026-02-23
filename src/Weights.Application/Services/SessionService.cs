@@ -95,6 +95,18 @@ public class SessionService(IUnitOfWork unitOfWork) : ISessionService
         return new SessionHistoryResponse { Data = data, TotalCount = totalCount, Page = page };
     }
 
+    public async Task<bool> DeleteAsync(int id, Guid userId, CancellationToken cancellationToken = default)
+    {
+        var session = await _unitOfWork.WorkoutSessions.GetByIdAsync(id, cancellationToken);
+
+        if (session == null || session.UserId != userId)
+            return false;
+
+        await _unitOfWork.WorkoutSessions.DeleteAsync(session, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     private static SessionDetailResponse MapToDetail(WorkoutSession session) => new()
     {
         Id = session.Id,

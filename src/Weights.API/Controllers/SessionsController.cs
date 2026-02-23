@@ -63,6 +63,20 @@ public class SessionsController(ISessionService sessionService) : ControllerBase
         return Ok(result);
     }
 
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        var userId = GetUserId();
+        var result = await _sessionService.DeleteAsync(id, userId, cancellationToken);
+
+        if (!result)
+            return Problem(detail: $"Session {id} not found or not owned by user.", statusCode: StatusCodes.Status404NotFound, title: "Not Found");
+
+        return NoContent();
+    }
+
     private Guid GetUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
