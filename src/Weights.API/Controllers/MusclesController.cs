@@ -30,4 +30,13 @@ public class MusclesController(IMuscleService muscleService) : ControllerBase
             return Problem(detail: $"Muscle {id} not found.", statusCode: StatusCodes.Status404NotFound, title: "Not Found");
         return Ok(muscle);
     }
+
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        await _muscleService.DeleteAsync(id, cancellationToken);
+        return NoContent();
+    }
 }

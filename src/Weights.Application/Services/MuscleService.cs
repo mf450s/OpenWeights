@@ -53,21 +53,13 @@ public class MuscleService(IUnitOfWork unitOfWork) : IMuscleService
         };
     }
 
-    public async Task<MuscleResponse?> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
         var muscle = await _unitOfWork.Muscles.GetByIdAsync(id, cancellationToken);
         if (muscle == null)
-            return null;
-
+            return;
         await _unitOfWork.Muscles.DeleteAsync(muscle, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        return new MuscleResponse
-        {
-            Id = muscle.Id,
-            Name = muscle.Name,
-            BodyPart = muscle.BodyPart
-        };
     }
 
     public async Task<MuscleResponse?> UpdateAsync(int id, MuscleUpdateRequest request, CancellationToken cancellationToken = default)

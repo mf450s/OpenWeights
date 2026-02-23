@@ -8,6 +8,6 @@ public interface IMuscleService
     Task<MuscleResponse?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
     Task<MuscleResponse> CreateAsync(MuscleCreateRequest request, CancellationToken cancellationToken = default);    
-    Task<MuscleResponse?> DeleteAsync(int id, CancellationToken cancellationToken = default);
+    Task DeleteAsync(int id, CancellationToken cancellationToken = default);
     Task<MuscleResponse?> UpdateAsync(int id, MuscleUpdateRequest request, CancellationToken cancellationToken = default);
 }
