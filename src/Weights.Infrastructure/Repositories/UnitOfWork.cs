@@ -66,6 +66,11 @@ public class UnitOfWork(
         }
     }
 
+    public async Task DeleteAsync(CancellationToken cancellationToken = default)
+    {
+        await _context.Database.EnsureDeletedAsync(cancellationToken);
+    }
+
     public void Dispose()
     {
         _transaction?.Dispose();

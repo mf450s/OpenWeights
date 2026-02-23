@@ -57,6 +57,30 @@ public class ExercisesController(IExerciseService exerciseService) : ControllerB
         return Ok(result);
     }
 
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        var userId = GetUserId();
+        var result = await _exerciseService.DeleteAsync(id, userId, cancellationToken);
+
+        if (!result)
+            return Problem(detail: $"Exercise {id} not found.", statusCode: StatusCodes.Status404NotFound, title: "Not Found");
+
+        return NoContent();
+    }
+
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Create(ExerciseCreateRequest request, CancellationToken cancellationToken)
+    {
+        var userId = GetUserId();
+        await _exerciseService.CreateAsync(request, userId, cancellationToken);
+        return CreatedAtAction(nameof(GetById), new { id = 1 }, request);
+    }
+
     private Guid GetUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
