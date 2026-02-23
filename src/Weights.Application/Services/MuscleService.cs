@@ -19,4 +19,74 @@ public class MuscleService(IUnitOfWork unitOfWork) : IMuscleService
             BodyPart = m.BodyPart
         });
     }
+
+    public async Task<MuscleResponse?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var muscle = await _unitOfWork.Muscles.GetByIdAsync(id, cancellationToken);
+        if (muscle == null)
+            return null;
+
+        return new MuscleResponse
+        {
+            Id = muscle.Id,
+            Name = muscle.Name,
+            BodyPart = muscle.BodyPart
+        };
+    }
+
+    public async Task<MuscleResponse> CreateAsync(MuscleCreateRequest request, CancellationToken cancellationToken = default)
+    {
+        var muscle = new Domain.Entities.Muscle
+        {
+            Name = request.Name,
+            BodyPart = request.BodyPart
+        };
+
+        await _unitOfWork.Muscles.AddAsync(muscle, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return new MuscleResponse
+        {
+            Id = muscle.Id,
+            Name = muscle.Name,
+            BodyPart = muscle.BodyPart
+        };
+    }
+
+    public async Task<MuscleResponse?> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var muscle = await _unitOfWork.Muscles.GetByIdAsync(id, cancellationToken);
+        if (muscle == null)
+            return null;
+
+        await _unitOfWork.Muscles.DeleteAsync(muscle, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return new MuscleResponse
+        {
+            Id = muscle.Id,
+            Name = muscle.Name,
+            BodyPart = muscle.BodyPart
+        };
+    }
+
+    public async Task<MuscleResponse?> UpdateAsync(int id, MuscleUpdateRequest request, CancellationToken cancellationToken = default)
+    {
+        var muscle = await _unitOfWork.Muscles.GetByIdAsync(id, cancellationToken);
+        if (muscle == null)
+            return null;
+
+        muscle.Name = request.Name;
+        muscle.BodyPart = request.BodyPart;
+
+        await _unitOfWork.Muscles.UpdateAsync(muscle, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return new MuscleResponse
+        {
+            Id = muscle.Id,
+            Name = muscle.Name,
+            BodyPart = muscle.BodyPart
+        };
+    }
 }

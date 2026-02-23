@@ -19,4 +19,15 @@ public class MusclesController(IMuscleService muscleService) : ControllerBase
         var muscles = await _muscleService.GetAllAsync(cancellationToken);
         return Ok(muscles);
     }
+
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(MuscleResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<MuscleResponse>> GetById(int id, CancellationToken cancellationToken)
+    {
+        var muscle = await _muscleService.GetByIdAsync(id, cancellationToken);
+        if (muscle == null)
+            return Problem(detail: $"Muscle {id} not found.", statusCode: StatusCodes.Status404NotFound, title: "Not Found");
+        return Ok(muscle);
+    }
 }
