@@ -48,10 +48,7 @@ public class AuthService(IUnitOfWork unitOfWork, IJwtService jwtService) : IAuth
     public async Task<RefreshTokenResponse> RefreshAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
         // Validate and extract claims from the existing token (even if expired)
-        var principal = _jwtService.GetPrincipalFromToken(request.Token);
-        if (principal == null)
-            throw new UnauthorizedAccessException("Invalid token");
-
+        var principal = _jwtService.GetPrincipalFromToken(request.Token) ?? throw new UnauthorizedAccessException("Invalid token");
         var userIdClaim = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var emailClaim = principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
 
@@ -59,10 +56,7 @@ public class AuthService(IUnitOfWork unitOfWork, IJwtService jwtService) : IAuth
             throw new UnauthorizedAccessException("Invalid token claims");
 
         // Verify user still exists
-        var user = await _unitOfWork.Users.GetByIdAsync(userId, cancellationToken);
-        if (user == null)
-            throw new UnauthorizedAccessException("User not found");
-
+        var user = await _unitOfWork.Users.GetByIdAsync(userId, cancellationToken) ?? throw new UnauthorizedAccessException("User not found");
         var newToken = _jwtService.GenerateToken(user.Id, user.Email);
         var expiresAt = _jwtService.GetTokenExpiration();
 
