@@ -28,7 +28,7 @@ src/
 
 ### Voraussetzungen
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - [PostgreSQL](https://www.postgresql.org/download/) (oder Docker)
 - [Docker](https://www.docker.com/get-started) (optional)
 
