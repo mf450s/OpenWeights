@@ -27,10 +27,10 @@ public class TemplateServiceTests
         var request = new CreateTemplateRequest
         {
             Name = "Push Day",
-            Exercises = new List<TemplateExerciseDto>
-            {
+            Exercises =
+            [
                 new() { ExerciseId = 1, OrderIndex = 1, TargetSets = 3, TargetRepsMin = 8, TargetRepsMax = 12, IsAMRAP = false }
-            }
+            ]
         };
 
         WorkoutTemplate? captured = null;
@@ -58,10 +58,10 @@ public class TemplateServiceTests
         var request = new CreateTemplateRequest
         {
             Name = "AMRAP Day",
-            Exercises = new List<TemplateExerciseDto>
-            {
+            Exercises =
+            [
                 new() { ExerciseId = 1, OrderIndex = 1, TargetSets = 1, IsAMRAP = true }
-            }
+            ]
         };
 
         WorkoutTemplate? captured = null;
@@ -83,10 +83,10 @@ public class TemplateServiceTests
         var request = new CreateTemplateRequest
         {
             Name = "Duration Day",
-            Exercises = new List<TemplateExerciseDto>
-            {
+            Exercises =
+            [
                 new() { ExerciseId = 1, OrderIndex = 1, TargetSets = 3, TargetRepsMin = null, TargetRepsMax = null }
-            }
+            ]
         };
 
         WorkoutTemplate? captured = null;
@@ -108,7 +108,7 @@ public class TemplateServiceTests
     {
         _mockTemplateRepository.Setup(x => x.GetWithExercisesAsync(99, It.IsAny<CancellationToken>())).ReturnsAsync((WorkoutTemplate?)null);
 
-        var result = await _templateService.UpdateAsync(Guid.NewGuid(), 99, new UpdateTemplateRequest { Name = "X", Exercises = new() });
+        var result = await _templateService.UpdateAsync(Guid.NewGuid(), 99, new UpdateTemplateRequest { Name = "X", Exercises = [] });
 
         Assert.Null(result);
     }
@@ -117,10 +117,10 @@ public class TemplateServiceTests
     public async Task UpdateAsync_WithWrongUser_ShouldReturnNull()
     {
         var ownerId = Guid.NewGuid();
-        var template = new WorkoutTemplate { Id = 1, UserId = ownerId, Name = "T", WorkoutTemplateExercises = new List<WorkoutTemplateExercise>() };
+        var template = new WorkoutTemplate { Id = 1, UserId = ownerId, Name = "T", WorkoutTemplateExercises = [] };
         _mockTemplateRepository.Setup(x => x.GetWithExercisesAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(template);
 
-        var result = await _templateService.UpdateAsync(Guid.NewGuid(), 1, new UpdateTemplateRequest { Name = "X", Exercises = new() });
+        var result = await _templateService.UpdateAsync(Guid.NewGuid(), 1, new UpdateTemplateRequest { Name = "X", Exercises = [] });
 
         Assert.Null(result);
     }

@@ -6,5 +6,5 @@ public class Muscle : Entity<int>
     public string BodyPart { get; set; } = string.Empty;
 
     // Navigation properties
-    public ICollection<ExerciseMuscle> ExerciseMuscles { get; set; } = new List<ExerciseMuscle>();
+    public ICollection<ExerciseMuscle> ExerciseMuscles { get; set; } = [];
 }

@@ -2,7 +2,7 @@ namespace Weights.Application.DTOs.Sessions;
 
 public class SessionHistoryResponse
 {
-    public List<SessionHistoryItem> Data { get; set; } = new();
+    public List<SessionHistoryItem> Data { get; set; } = [];
     public int TotalCount { get; set; }
     public int Page { get; set; }
 }

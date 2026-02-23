@@ -38,20 +38,19 @@ public class TemplateService(IUnitOfWork unitOfWork) : ITemplateService
         {
             UserId = userId,
             Name = request.Name,
-            Description = request.Description
+            Description = request.Description,
+            WorkoutTemplateExercises = [.. request.Exercises.Select(e => new WorkoutTemplateExercise
+            {
+                ExerciseId = e.ExerciseId,
+                OrderIndex = e.OrderIndex,
+                TargetSets = e.TargetSets,
+                TargetRepsMin = e.TargetRepsMin,
+                TargetRepsMax = e.TargetRepsMax,
+                IsAMRAP = e.IsAMRAP,
+                TargetRPE = e.TargetRPE,
+                RestSeconds = e.RestSeconds
+            })]
         };
-
-        template.WorkoutTemplateExercises = request.Exercises.Select(e => new WorkoutTemplateExercise
-        {
-            ExerciseId = e.ExerciseId,
-            OrderIndex = e.OrderIndex,
-            TargetSets = e.TargetSets,
-            TargetRepsMin = e.TargetRepsMin,
-            TargetRepsMax = e.TargetRepsMax,
-            IsAMRAP = e.IsAMRAP,
-            TargetRPE = e.TargetRPE,
-            RestSeconds = e.RestSeconds
-        }).ToList();
 
         await _unitOfWork.WorkoutTemplates.AddAsync(template, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -72,7 +71,7 @@ public class TemplateService(IUnitOfWork unitOfWork) : ITemplateService
         template.UpdatedAt = DateTime.UtcNow;
 
         // Replace exercises
-        template.WorkoutTemplateExercises = request.Exercises.Select(e => new WorkoutTemplateExercise
+        template.WorkoutTemplateExercises = [.. request.Exercises.Select(e => new WorkoutTemplateExercise
         {
             ExerciseId = e.ExerciseId,
             OrderIndex = e.OrderIndex,
@@ -82,7 +81,7 @@ public class TemplateService(IUnitOfWork unitOfWork) : ITemplateService
             IsAMRAP = e.IsAMRAP,
             TargetRPE = e.TargetRPE,
             RestSeconds = e.RestSeconds
-        }).ToList();
+        })];
 
         await _unitOfWork.WorkoutTemplates.UpdateAsync(template, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -114,7 +113,7 @@ public class TemplateService(IUnitOfWork unitOfWork) : ITemplateService
         Description = template.Description,
         IsArchived = template.IsArchived,
         UpdatedAt = template.UpdatedAt,
-        Exercises = template.WorkoutTemplateExercises.Select(wte => new TemplateExerciseResponse
+        Exercises = [.. template.WorkoutTemplateExercises.Select(wte => new TemplateExerciseResponse
         {
             Id = wte.Id,
             ExerciseId = wte.ExerciseId,
@@ -126,6 +125,6 @@ public class TemplateService(IUnitOfWork unitOfWork) : ITemplateService
             IsAMRAP = wte.IsAMRAP,
             TargetRPE = wte.TargetRPE,
             RestSeconds = wte.RestSeconds
-        }).OrderBy(e => e.OrderIndex).ToList()
+        }).OrderBy(e => e.OrderIndex)]
     };
 }

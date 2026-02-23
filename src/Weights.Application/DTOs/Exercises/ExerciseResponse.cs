@@ -6,7 +6,7 @@ public class ExerciseResponse
     public string Name { get; set; } = string.Empty;
     public string TrackType { get; set; } = string.Empty;
     public string Laterality { get; set; } = string.Empty;
-    public List<ExerciseMuscleDto> Muscles { get; set; } = new();
+    public List<ExerciseMuscleDto> Muscles { get; set; } = [];
 }
 
 public class ExerciseMuscleDto

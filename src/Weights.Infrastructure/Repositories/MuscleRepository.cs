@@ -14,10 +14,10 @@ public class MuscleRepository(ApplicationDbContext context) : Repository<Muscle,
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<Muscle> DeleteAsync(Muscle muscle, CancellationToken cancellationToken = default)
-    {
-        DbSet.Remove(muscle);
-        await Context.SaveChangesAsync(cancellationToken);
-        return muscle;
-    }
+    // public async Task<Muscle> DeleteAsync(Muscle muscle, CancellationToken cancellationToken = default)
+    // {
+    //     DbSet.Remove(muscle);
+    //     await Context.SaveChangesAsync(cancellationToken);
+    //     return muscle;
+    // }
 }

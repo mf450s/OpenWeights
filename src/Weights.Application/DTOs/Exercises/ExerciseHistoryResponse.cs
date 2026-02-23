@@ -4,14 +4,14 @@ public class ExerciseHistoryResponse
 {
     public int ExerciseId { get; set; }
     public string ExerciseName { get; set; } = string.Empty;
-    public List<ExerciseHistorySetGroup> Sessions { get; set; } = new();
+    public List<ExerciseHistorySetGroup> Sessions { get; set; } = [];
 }
 
 public class ExerciseHistorySetGroup
 {
     public int SessionId { get; set; }
     public DateTime Date { get; set; }
-    public List<ExerciseHistorySet> Sets { get; set; } = new();
+    public List<ExerciseHistorySet> Sets { get; set; } = [];
 }
 
 public class ExerciseHistorySet

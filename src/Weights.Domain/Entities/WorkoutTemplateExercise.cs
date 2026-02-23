@@ -17,5 +17,5 @@ public class WorkoutTemplateExercise : Entity<int>
     public int? RestSeconds { get; set; }
 
     // Navigation properties
-    public ICollection<SetHistory> SetHistories { get; set; } = new List<SetHistory>();
+    public ICollection<SetHistory> SetHistories { get; set; } = [];
 }

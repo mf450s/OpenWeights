@@ -20,7 +20,7 @@ public class CreateSessionRequest
     public string? Note { get; set; }
 
     [Required]
-    public List<SetDto> Sets { get; set; } = new();
+    public List<SetDto> Sets { get; set; } = [];
 }
 
 public class SetDto

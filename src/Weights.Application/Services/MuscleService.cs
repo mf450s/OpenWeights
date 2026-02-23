@@ -39,7 +39,7 @@ public class MuscleService(IUnitOfWork unitOfWork) : IMuscleService
         var muscle = new Domain.Entities.Muscle
         {
             Name = request.Name,
-            BodyPart = request.BodyPart
+            BodyPart = request.BodyPart ?? string.Empty
         };
 
         await _unitOfWork.Muscles.AddAsync(muscle, cancellationToken);
@@ -69,7 +69,7 @@ public class MuscleService(IUnitOfWork unitOfWork) : IMuscleService
             return null;
 
         muscle.Name = request.Name;
-        muscle.BodyPart = request.BodyPart;
+        muscle.BodyPart = request.BodyPart ?? string.Empty;
 
         await _unitOfWork.Muscles.UpdateAsync(muscle, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

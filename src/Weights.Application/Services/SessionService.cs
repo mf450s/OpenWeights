@@ -21,7 +21,7 @@ public class SessionService(IUnitOfWork unitOfWork) : ISessionService
             StartTime = request.StartTime,
             EndTime = request.EndTime,
             Note = request.Note,
-            SetHistories = request.Sets.Select(s => new SetHistory
+            SetHistories = [.. request.Sets.Select(s => new SetHistory
             {
                 ExerciseId = s.ExerciseId,
                 SetNumber = s.SetNumber,
@@ -32,7 +32,7 @@ public class SessionService(IUnitOfWork unitOfWork) : ISessionService
                 DistanceMeters = s.DistanceMeters,
                 Side = !string.IsNullOrWhiteSpace(s.Side) && Enum.TryParse<Side>(s.Side, true, out var side) ? side : null,
                 PerformedAt = s.PerformedAt
-            }).ToList()
+            })]
         };
 
         await _unitOfWork.WorkoutSessions.AddAsync(session, cancellationToken);
@@ -116,7 +116,7 @@ public class SessionService(IUnitOfWork unitOfWork) : ISessionService
         StartTime = session.StartTime,
         EndTime = session.EndTime,
         Note = session.Note,
-        Sets = session.SetHistories.Select(sh => new SessionSetResponse
+        Sets = [.. session.SetHistories.Select(sh => new SessionSetResponse
         {
             Id = sh.Id,
             ExerciseId = sh.ExerciseId,
@@ -130,6 +130,6 @@ public class SessionService(IUnitOfWork unitOfWork) : ISessionService
             Side = sh.Side?.ToString(),
             WorkoutTemplateExerciseId = sh.WorkoutTemplateExerciseId,
             PerformedAt = sh.PerformedAt
-        }).OrderBy(s => s.SetNumber).ToList()
+        }).OrderBy(s => s.SetNumber)]
     };
 }

@@ -12,5 +12,5 @@ public class UpdateTemplateRequest
     public string? Description { get; set; }
 
     [Required]
-    public List<TemplateExerciseDto> Exercises { get; set; } = new();
+    public List<TemplateExerciseDto> Exercises { get; set; } = [];
 }

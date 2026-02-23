@@ -9,7 +9,7 @@ public class SessionDetailResponse
     public DateTime StartTime { get; set; }
     public DateTime? EndTime { get; set; }
     public string? Note { get; set; }
-    public List<SessionSetResponse> Sets { get; set; } = new();
+    public List<SessionSetResponse> Sets { get; set; } = [];
 }
 
 public class SessionSetResponse

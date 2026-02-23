@@ -7,7 +7,7 @@ public class TemplateResponse
     public string? Description { get; set; }
     public bool IsArchived { get; set; }
     public DateTime? UpdatedAt { get; set; }
-    public List<TemplateExerciseResponse> Exercises { get; set; } = new();
+    public List<TemplateExerciseResponse> Exercises { get; set; } = [];
 }
 
 public class TemplateExerciseResponse

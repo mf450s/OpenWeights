@@ -10,7 +10,7 @@ public class Exercise : Entity<int>
     public Laterality Laterality { get; set; } = Laterality.Bilateral;
 
     // Navigation properties
-    public ICollection<ExerciseMuscle> ExerciseMuscles { get; set; } = new List<ExerciseMuscle>();
-    public ICollection<WorkoutTemplateExercise> WorkoutTemplateExercises { get; set; } = new List<WorkoutTemplateExercise>();
-    public ICollection<SetHistory> SetHistories { get; set; } = new List<SetHistory>();
+    public ICollection<ExerciseMuscle> ExerciseMuscles { get; set; } = [];
+    public ICollection<WorkoutTemplateExercise> WorkoutTemplateExercises { get; set; } = [];
+    public ICollection<SetHistory> SetHistories { get; set; } = [];
 }

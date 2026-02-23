@@ -9,6 +9,6 @@ public class User : Entity<Guid>
     public DateTime? UpdatedAt { get; set; }
 
     // Navigation properties
-    public ICollection<WorkoutTemplate> WorkoutTemplates { get; set; } = new List<WorkoutTemplate>();
-    public ICollection<WorkoutSession> WorkoutSessions { get; set; } = new List<WorkoutSession>();
+    public ICollection<WorkoutTemplate> WorkoutTemplates { get; set; } = [];
+    public ICollection<WorkoutSession> WorkoutSessions { get; set; } = [];
 }

@@ -55,10 +55,10 @@ public class ExerciseRepositoryTests
         {
             Id = 10,
             Name = "Liegestütze",
-            ExerciseMuscles = new List<ExerciseMuscle>
-            {
+            ExerciseMuscles =
+            [
                 new ExerciseMuscle { Muscle = muscle, MuscleId = muscle.Id }
-            }
+            ]
         };
 
         _context.Exercises.Add(exercise);
@@ -119,20 +119,20 @@ public class ExerciseRepositoryTests
         {
             Id = 1,
             Name = "Bankdrücken",
-            ExerciseMuscles = new List<ExerciseMuscle>
-            {
+            ExerciseMuscles =
+            [
                 new ExerciseMuscle { Muscle = muscle1, MuscleId = muscle1.Id }
-            }
+            ]
         };
 
         var exercise2 = new Exercise
         {
             Id = 2,
             Name = "Rudern",
-            ExerciseMuscles = new List<ExerciseMuscle>
-            {
+            ExerciseMuscles =
+            [
                 new ExerciseMuscle { Muscle = muscle2, MuscleId = muscle2.Id }
-            }
+            ]
         };
 
         _context.Exercises.AddRange(exercise1, exercise2);
