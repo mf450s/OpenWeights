@@ -1,6 +1,6 @@
 # Weights — Workout Tracking API
 
-A modern, clean-architecture workout tracking REST API built with .NET 9 and Entity Framework Core.
+A modern, clean-architecture workout tracking REST API built with .NET 10 and Entity Framework Core.
 
 ---
 
