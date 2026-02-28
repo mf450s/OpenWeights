@@ -1,59 +1,68 @@
-# Weights - Workout Tracking API
+# Weights — Workout Tracking API
 
-Eine moderne Workout-Tracking API entwickelt mit .NET 9 und Entity Framework Core.
+A modern, clean-architecture workout tracking REST API built with .NET 9 and Entity Framework Core.
 
-## 🎯 Features
+---
 
-- **Benutzer-Authentifizierung** mit JWT Token
-- **Workout-Management** (Workouts erstellen, bearbeiten, löschen)
-- **Übungs-Datenbank** mit Muskelgruppen-Mapping
-- **Workout-Logs** mit verschiedenen Track-Types (Weight+Reps, Bodyweight, Duration, Distance)
-- **Mehrsprachigkeit** (Deutsch/Englisch)
-- **Swagger/OpenAPI** Dokumentation
-- **Docker-Ready** mit Multi-Stage Build
+## ✨ Features
 
-## 🏗️ Architektur
+- **JWT Authentication** — Secure registration and login flow
+- **Workout Management** — Full CRUD for workout templates
+- **Exercise Database** — Pre-seeded exercises with muscle group mappings
+- **Workout Logs** — Track sets with multiple tracking modes (Weight & Reps, Bodyweight, Duration, Distance)
+- **Internationalization** — English and German support via `Accept-Language` header
+- **OpenAPI / Swagger UI** — Interactive API documentation out of the box
+- **Docker Ready** — Multi-stage Dockerfile and Docker Compose included
 
-Das Projekt folgt der **Clean Architecture** mit folgenden Layern:
+---
+
+## 🏗️ Architecture
+
+The project follows **Clean Architecture** principles, strictly separating concerns across four layers:
 
 ```
 src/
-├── Weights.API/              # API Layer (Controllers, Middleware)
-├── Weights.Application/      # Application Layer (Use Cases, DTOs, Interfaces)
-├── Weights.Domain/           # Domain Layer (Entities, Enums, Value Objects)
-└── Weights.Infrastructure/   # Infrastructure Layer (Database, Services)
+├── Weights.API/              # Controllers, middleware, program entry point
+├── Weights.Application/      # Use cases, DTOs, interfaces, validation
+├── Weights.Domain/           # Entities, enums, value objects (no dependencies)
+└── Weights.Infrastructure/   # EF Core, PostgreSQL, service implementations
 ```
 
-## 🚀 Quick Start
+---
 
-### Voraussetzungen
+## 🚀 Getting Started
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- [PostgreSQL](https://www.postgresql.org/download/) (oder Docker)
-- [Docker](https://www.docker.com/get-started) (optional)
+### Prerequisites
 
-### Mit .NET CLI
+- [.NET 9 SDK](https://dotnet.microsoft.com/download)
+- [PostgreSQL](https://www.postgresql.org/download/) — or use Docker Compose to spin one up automatically
+- [Docker](https://www.docker.com/get-started) *(Option B only)*
+- [`jq`](https://stedolan.github.io/jq/) *(required for the curl examples — `brew install jq` / `apt install jq`)*
 
-1. **Repository klonen**
+---
+
+### Option A — .NET CLI
+
+**1. Clone the repository**
 ```bash
 git clone https://github.com/mf450s/weights.git
 cd weights
 ```
 
-2. **appsettings.json konfigurieren**
+**2. Configure application settings**
 ```bash
 cd src/Weights.API
 cp appsettings.Development.json appsettings.json
 ```
 
-Passe die Connection String und JWT-Settings an:
+Edit `appsettings.json` with your database credentials and JWT secret:
 ```json
 {
   "ConnectionStrings": {
     "DefaultConnection": "Host=localhost;Database=weights;Username=postgres;Password=yourpassword"
   },
   "Jwt": {
-    "SecretKey": "your-super-secret-key-min-32-characters",
+    "SecretKey": "your-super-secret-key-minimum-32-characters",
     "Issuer": "WeightsAPI",
     "Audience": "WeightsClient",
     "ExpirationMinutes": 60
@@ -61,279 +70,48 @@ Passe die Connection String und JWT-Settings an:
 }
 ```
 
-3. **Datenbank Migration**
+> ⚠️ The JWT `SecretKey` must be at least 32 characters long.
+
+**3. Apply database migrations**
 ```bash
 dotnet ef database update --project ../Weights.Infrastructure --startup-project .
 ```
 
-4. **API starten**
+**4. Run the API**
 ```bash
 dotnet run
 ```
 
-Die API ist nun unter `https://localhost:5001` verfügbar.
+The API is now available at `https://localhost:5001`.  
 Swagger UI: `https://localhost:5001/swagger`
 
-### Mit Docker
+---
 
-1. **Docker Image bauen**
-```bash
-docker build -t weights-api .
-```
+### Option B — Docker Compose
 
-2. **Mit Docker Compose starten** (inkl. PostgreSQL)
+Starts both the API and a PostgreSQL instance. After the containers are up, you must run the database migrations once before the API will accept requests.
+
+**1. Start the containers**
 ```bash
 docker-compose up -d
 ```
 
-Die API läuft auf Port 8080, PostgreSQL auf Port 5432.
-
-## 📚 API Endpoints
-
-### Authentication
-
-#### Registrieren
-```http
-POST /api/auth/register
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "SecurePassword123!",
-  "username": "johndoe"
-}
+**2. Run migrations**
+```bash
+docker-compose exec api dotnet ef database update \
+  --project Weights.Infrastructure \
+  --startup-project Weights.API
 ```
 
-#### Login
-```http
-POST /api/auth/login
-Content-Type: application/json
+> ℹ️ The API container will restart and fail until migrations have been applied. This is expected on first run.
 
-{
-  "email": "user@example.com",
-  "password": "SecurePassword123!"
-}
-
-Response:
-{
-  "token": "eyJhbGciOiJIUzI1NiIs...",
-  "expiresAt": "2026-02-09T13:30:00Z"
-}
-```
-
-### Workouts
-
-Alle Workout-Endpoints benötigen einen JWT Token:
-```http
-Authorization: Bearer <your-token>
-```
-
-#### Workout erstellen
-```http
-POST /api/workouts
-Content-Type: application/json
-
-{
-  "name": "Push Day",
-  "description": "Chest, Shoulders, Triceps",
-  "exercises": [
-    {
-      "exerciseId": 1,
-      "sets": 4,
-      "restTimeSeconds": 90,
-      "notes": "Focus on form"
-    },
-    {
-      "exerciseId": 5,
-      "sets": 3,
-      "restTimeSeconds": 60
-    }
-  ]
-}
-```
-
-#### Alle Workouts abrufen
-```http
-GET /api/workouts
-```
-
-#### Workout abrufen
-```http
-GET /api/workouts/{id}
-```
-
-#### Workout aktualisieren
-```http
-PUT /api/workouts/{id}
-Content-Type: application/json
-
-{
-  "name": "Updated Push Day",
-  "description": "Updated description",
-  "exercises": [...]
-}
-```
-
-#### Workout löschen
-```http
-DELETE /api/workouts/{id}
-```
-
-### Workout Logs
-
-#### Log erstellen (Weight + Reps)
-```http
-POST /api/workout-logs
-Content-Type: application/json
-
-{
-  "workoutId": 1,
-  "exercises": [
-    {
-      "workoutExerciseId": 1,
-      "sets": [
-        {
-          "weight": 80,
-          "reps": 8,
-          "rpe": 8
-        },
-        {
-          "weight": 80,
-          "reps": 7,
-          "rpe": 9
-        }
-      ]
-    }
-  ],
-  "notes": "Good session"
-}
-```
-
-#### Log erstellen (Bodyweight)
-```http
-POST /api/workout-logs
-Content-Type: application/json
-
-{
-  "workoutId": 2,
-  "exercises": [
-    {
-      "workoutExerciseId": 4,
-      "sets": [
-        {
-          "reps": 12,
-          "rpe": 7
-        },
-        {
-          "reps": 10,
-          "rpe": 8
-        }
-      ]
-    }
-  ]
-}
-```
-
-#### Logs abrufen
-```http
-GET /api/workout-logs?workoutId=1&startDate=2026-01-01&endDate=2026-12-31
-```
-
-#### Log löschen
-```http
-DELETE /api/workout-logs/{id}
-```
-
-### Exercises
-
-#### Alle Übungen abrufen
-```http
-GET /api/exercises
-```
-
-#### Übung abrufen
-```http
-GET /api/exercises/{id}
-```
-
-#### Übung erstellen
-```http
-POST /api/exercises
-Content-Type: application/json
-
-{
-  "name": "Dumbbell Flyes",
-  "description": "Chest isolation exercise",
-  "trackType": "WeightReps",
-  "targetedMuscles": [
-    {
-      "muscleId": 1,
-      "targetType": "Primary"
-    }
-  ]
-}
-```
-
-### Muscles
-
-#### Alle Muskelgruppen abrufen
-```http
-GET /api/muscles
-```
-
-## 🗄️ Datenbank Schema
-
-### Entities
-
-- **User**: Benutzer mit Email, Password Hash
-- **Muscle**: Muskelgruppen (Chest, Back, Legs, etc.)
-- **Exercise**: Übungen mit TrackType
-- **ExerciseMuscle**: Many-to-Many Beziehung zwischen Exercise und Muscle
-- **Workout**: Workout-Templates
-- **WorkoutExercise**: Übungen in einem Workout
-- **WorkoutLog**: Durchgeführte Workouts
-- **WorkoutLogExercise**: Übungen im Log
-- **WorkoutLogSet**: Einzelne Sets im Log
-
-### TrackTypes
-
-- `WeightReps`: Gewicht + Wiederholungen (z.B. Bench Press)
-- `BodyweightReps`: Nur Wiederholungen (z.B. Pull-Ups)
-- `Duration`: Zeit in Sekunden (z.B. Plank)
-- `Distance`: Distanz in Metern (z.B. Running)
-
-### TargetTypes
-
-- `Primary`: Primär beanspruchter Muskel
-- `Secondary`: Sekundär beanspruchter Muskel
-
-## 🔒 Security
-
-- **Password Hashing** mit BCrypt
-- **JWT Token** für Authentication
-- **Token Expiration** konfigurierbar
-- **HTTPS** enforced in Production
-
-## 🌐 Internationalisierung
-
-Die API unterstützt Deutsch (de-DE) und Englisch (en-US).
-
-Sprache über Header setzen:
-```http
-Accept-Language: de-DE
-```
-
-## 🐳 Docker
-
-### Dockerfile
-
-Multi-Stage Build für optimale Image-Größe:
-- Build Stage: .NET SDK
-- Runtime Stage: .NET ASP.NET Runtime (minimal)
-
-### docker-compose.yml
+| Service    | Address               |
+|------------|-----------------------|
+| API        | `http://localhost:8080` |
+| PostgreSQL | `localhost:5432`      |
 
 ```yaml
+# docker-compose.yml
 services:
   api:
     build: .
@@ -360,41 +138,320 @@ volumes:
   postgres_data:
 ```
 
-## 🧪 Testen
+---
 
-### Mit Swagger UI
+## ⚙️ Environment Variables
 
-1. API starten
-2. Browser öffnen: `https://localhost:5001/swagger`
-3. "Authorize" klicken und JWT Token eingeben
-4. Endpoints testen
+All configuration can be passed as environment variables, which takes precedence over `appsettings.json`. This is the recommended approach for Docker and cloud deployments.
 
-### Mit curl
+| Variable                                  | Description                                      | Default (dev)         |
+|-------------------------------------------|--------------------------------------------------|-----------------------|
+| `ConnectionStrings__DefaultConnection`    | PostgreSQL connection string                     | *(required)*          |
+| `Jwt__SecretKey`                          | Signing key for JWT tokens (min. 32 characters)  | *(required)*          |
+| `Jwt__Issuer`                             | JWT issuer claim                                 | `WeightsAPI`          |
+| `Jwt__Audience`                           | JWT audience claim                               | `WeightsClient`       |
+| `Jwt__ExpirationMinutes`                  | Token lifetime in minutes                        | `60`                  |
+| `ASPNETCORE_ENVIRONMENT`                  | Runtime environment (`Development`/`Production`) | `Production`          |
+
+> ⚠️ Never commit real secrets to source control. Use environment variables or a secrets manager in production.
+
+---
+
+### Authentication
+
+#### Register
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "SecurePassword123!",
+  "username": "johndoe"
+}
+```
+
+#### Login
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "SecurePassword123!"
+}
+```
+```json
+// Response
+{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "expiresAt": "2026-02-09T13:30:00Z"
+}
+```
+
+---
+
+### Workouts
+
+All workout endpoints require a valid JWT token:
+```http
+Authorization: Bearer <your-token>
+```
+
+| Method   | Endpoint             | Description               |
+|----------|----------------------|---------------------------|
+| `POST`   | `/api/workouts`      | Create a workout template |
+| `GET`    | `/api/workouts`      | List all workouts         |
+| `GET`    | `/api/workouts/{id}` | Get a single workout      |
+| `PUT`    | `/api/workouts/{id}` | Update a workout          |
+| `DELETE` | `/api/workouts/{id}` | Delete a workout          |
+
+**Example — Create Workout**
+```http
+POST /api/workouts
+Content-Type: application/json
+
+{
+  "name": "Push Day",
+  "description": "Chest, Shoulders, Triceps",
+  "exercises": [
+    {
+      "exerciseId": 1,
+      "sets": 4,
+      "restTimeSeconds": 90,
+      "notes": "Focus on form"
+    },
+    {
+      "exerciseId": 5,
+      "sets": 3,
+      "restTimeSeconds": 60
+    }
+  ]
+}
+```
+
+---
+
+### Workout Logs
+
+| Method   | Endpoint                                                   | Description        |
+|----------|------------------------------------------------------------|--------------------|
+| `POST`   | `/api/workout-logs`                                        | Log a session      |
+| `GET`    | `/api/workout-logs?workoutId=1&startDate=...&endDate=...`  | Query logs         |
+| `DELETE` | `/api/workout-logs/{id}`                                   | Delete a log entry |
+
+**Example — Log Weight & Reps Session**
+```http
+POST /api/workout-logs
+Content-Type: application/json
+
+{
+  "workoutId": 1,
+  "notes": "Good session",
+  "exercises": [
+    {
+      "workoutExerciseId": 1,
+      "sets": [
+        { "weight": 80, "reps": 8, "rpe": 8 },
+        { "weight": 80, "reps": 7, "rpe": 9 }
+      ]
+    }
+  ]
+}
+```
+
+**Example — Log Bodyweight Session**
+```http
+POST /api/workout-logs
+Content-Type: application/json
+
+{
+  "workoutId": 2,
+  "exercises": [
+    {
+      "workoutExerciseId": 4,
+      "sets": [
+        { "reps": 12, "rpe": 7 },
+        { "reps": 10, "rpe": 8 }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+### Exercises
+
+| Method | Endpoint             | Description          |
+|--------|----------------------|----------------------|
+| `GET`  | `/api/exercises`     | List all exercises   |
+| `GET`  | `/api/exercises/{id}`| Get a single exercise|
+| `POST` | `/api/exercises`     | Create an exercise   |
+
+**Example — Create Exercise**
+```http
+POST /api/exercises
+Content-Type: application/json
+
+{
+  "name": "Dumbbell Flyes",
+  "description": "Chest isolation exercise",
+  "trackType": "WeightReps",
+  "targetedMuscles": [
+    { "muscleId": 1, "targetType": "Primary" }
+  ]
+}
+```
+
+### Muscles
+
+```http
+GET /api/muscles    # Returns all muscle groups
+```
+
+---
+
+## 🗄️ Data Model
+
+### Entities
+
+| Entity               | Description                                        |
+|----------------------|----------------------------------------------------|
+| `User`               | Authenticated user with hashed password            |
+| `Muscle`             | Muscle group (e.g. Pectoralis, Quadriceps)         |
+| `Exercise`           | Exercise definition with a TrackType               |
+| `ExerciseMuscle`     | Many-to-many: Exercise ↔ Muscle                    |
+| `Workout`            | Reusable workout template                          |
+| `WorkoutExercise`    | Exercise entry within a workout template           |
+| `WorkoutLog`         | Record of a completed workout session              |
+| `WorkoutLogExercise` | Exercise entry within a log                        |
+| `WorkoutLogSet`      | Individual set data within a log exercise          |
+
+### Track Types
+
+| Value           | Use Case                       | Tracked Fields        |
+|-----------------|--------------------------------|-----------------------|
+| `WeightReps`    | Barbell / dumbbell exercises   | Weight (kg) + Reps    |
+| `BodyweightReps`| Calisthenics (e.g. Pull-Ups)   | Reps only             |
+| `Duration`      | Holds (e.g. Plank)             | Time in seconds       |
+| `Distance`      | Cardio (e.g. Running)          | Distance in meters    |
+
+### Target Types
+
+| Value       | Meaning                              |
+|-------------|--------------------------------------|
+| `Primary`   | Muscle group primarily trained       |
+| `Secondary` | Muscle group secondarily involved    |
+
+---
+
+## 🔒 Security
+
+- Passwords hashed with **BCrypt**
+- Stateless authentication via **JWT Bearer tokens**
+- Configurable token expiration
+- HTTPS enforced in production
+
+---
+
+## 🌐 Internationalization
+
+The API supports **English** (`en-US`) and **German** (`de-DE`).
+
+Set the language via request header:
+```http
+Accept-Language: de-DE
+```
+
+---
+
+## 🧪 Testing
+
+### Swagger UI
+
+1. Start the API
+2. Open `https://localhost:5001/swagger`
+3. Click the **Authorize** button (🔒) in the top right
+4. In the value field, enter your token **without** the `Bearer ` prefix — Swagger adds it automatically
+5. Explore and test all endpoints interactively
+
+### curl
 
 ```bash
-# Registrieren
+# Register
 curl -X POST https://localhost:5001/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"test@test.com","password":"Test123!","username":"testuser"}'
 
-# Login
-TOKEN=$(curl -X POST https://localhost:5001/api/auth/login \
+# Login and capture token
+TOKEN=$(curl -s -X POST https://localhost:5001/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@test.com","password":"Test123!"}' \
   | jq -r '.token')
 
-# Workouts abrufen
+# Fetch workouts
 curl -X GET https://localhost:5001/api/workouts \
   -H "Authorization: Bearer $TOKEN"
 ```
 
+---
+
+## 🌱 Seed Data
+
+On first startup, the following data is automatically seeded:
+
+- **12 muscle groups** — Pectoralis, Latissimus, Quadriceps, and more
+- **12 exercises** — Bench Press, Squat, Deadlift, and more
+- **Muscle–Exercise mappings** with Primary/Secondary target types
+
+---
+
+## 🛠️ Development
+
+### Migrations
+
+```bash
+# Create a new migration
+cd src/Weights.Infrastructure
+dotnet ef migrations add <MigrationName> --startup-project ../Weights.API
+
+# Apply pending migrations
+dotnet ef database update --startup-project ../Weights.API
+
+# Roll back to a previous migration
+dotnet ef database update <PreviousMigrationName> --startup-project ../Weights.API
+```
+
+---
+
+## 📦 Key Dependencies
+
+| Layer          | Package                                          |
+|----------------|--------------------------------------------------|
+| API            | `Microsoft.AspNetCore.Authentication.JwtBearer`  |
+| API            | `Swashbuckle.AspNetCore`                         |
+| Application    | `FluentValidation`                               |
+| Application    | `BCrypt.Net-Next`                                |
+| Infrastructure | `Microsoft.EntityFrameworkCore`                  |
+| Infrastructure | `Npgsql.EntityFrameworkCore.PostgreSQL`          |
+| Infrastructure | `Microsoft.EntityFrameworkCore.Tools`            |
+
+---
+
 ## 🔄 CI/CD
 
-### GitHub Actions Workflow
+The included GitHub Actions workflow triggers on every push to `main` or `development`, and on pull requests targeting `main`. It builds the Docker image and pushes it to **GitHub Container Registry (GHCR)** under two tags: `latest` and the full commit SHA for traceability.
 
-Erstelle `.github/workflows/docker-publish.yml`:
+To pull the published image:
+```bash
+docker pull ghcr.io/<your-github-username>/weights:latest
+```
+
+No additional secrets need to be configured — the workflow uses the built-in `GITHUB_TOKEN`.
 
 ```yaml
+# .github/workflows/docker-publish.yml
 name: Docker Build and Push
 
 on:
@@ -406,92 +463,88 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-    
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Build and push
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        push: true
-        tags: |
-          ghcr.io/${{ github.repository }}:latest
-          ghcr.io/${{ github.repository }}:${{ github.sha }}
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
 ```
 
-## 📝 Seed Data
+---
 
-Beim ersten Start werden automatisch Daten eingefügt:
+## ⚠️ Known Limitations
 
-- **12 Muskelgruppen** (Pectoralis, Lats, Quadriceps, etc.)
-- **12 Übungen** (Bench Press, Squat, Deadlift, etc.)
-- **Muscle-Exercise Mappings**
+- **No refresh tokens** — JWT tokens cannot be refreshed; users must re-authenticate after expiry
+- **No pagination** — list endpoints (`GET /api/workouts`, `GET /api/exercises`, etc.) return all records without limit or offset support
+- **No role-based access** — all authenticated users share the same permission level; there is no admin role
+- **No rate limiting** — the API does not currently throttle requests
 
-## 🛠️ Development
+---
 
-### Neue Migration erstellen
+## 🗺️ Roadmap
 
-```bash
-cd src/Weights.Infrastructure
-dotnet ef migrations add MigrationName --startup-project ../Weights.API
-```
+- [ ] Refresh token support
+- [ ] Pagination for list endpoints
+- [ ] User profile endpoint (update username, change password)
+- [ ] Progress analytics endpoint (volume over time per exercise)
+- [ ] Role-based access control for exercise/muscle administration
 
-### Migration anwenden
+---
 
-```bash
-dotnet ef database update --startup-project ../Weights.API
-```
 
-### Migration rückgängig machen
 
-```bash
-dotnet ef database update PreviousMigration --startup-project ../Weights.API
-```
+Contributions, bug reports, and feature requests are welcome. Please open an issue before starting work on a significant change so we can discuss the approach first.
 
-## 📦 NuGet Packages
+**Branch naming**
 
-### API
-- Microsoft.AspNetCore.Authentication.JwtBearer
-- Swashbuckle.AspNetCore
+| Type    | Pattern                     | Example                        |
+|---------|-----------------------------|--------------------------------|
+| Feature | `feature/<short-description>` | `feature/refresh-token`      |
+| Fix     | `fix/<short-description>`     | `fix/log-delete-auth`        |
+| Chore   | `chore/<short-description>`   | `chore/update-dependencies`  |
 
-### Application
-- BCrypt.Net-Next
-- FluentValidation
+**Workflow**
 
-### Infrastructure
-- Microsoft.EntityFrameworkCore
-- Npgsql.EntityFrameworkCore.PostgreSQL
-- Microsoft.EntityFrameworkCore.Tools
+1. Open an issue describing the bug or feature
+2. Fork the repository and branch off from `development`
+3. Implement your changes with clear, atomic commits
+4. Ensure the project builds and all existing functionality works
+5. Open a Pull Request against `development` with a description referencing the issue
+6. Wait for code review and address any feedback
+7. A maintainer will merge after approval
 
-## 🤝 Contributing
-
-1. Branch von `development` erstellen
-2. Features implementieren
-3. Pull Request erstellen
-4. Code Review abwarten
-5. Merge in `development`
+---
 
 ## 📄 License
 
-MIT License - siehe LICENSE Datei
+Distributed under the **MIT License**. See `LICENSE` for details.
+
+---
 
 ## 👤 Author
 
-**Tom** - Azubi zum Fachinformatiker für Anwendungsentwicklung bei Trilux
+**Tom** — Apprentice Software Developer at Trilux
 
-## 🙏 Acknowledgments
+---
 
-- Clean Architecture von Jason Taylor
-- Entity Framework Core Team
-- ASP.NET Core Team
+## 🙏 Acknowledgements
+
+- Inspired by [Clean Architecture](https://github.com/jasontaylordev/CleanArchitecture) by Jason Taylor
+- [Entity Framework Core](https://github.com/dotnet/efcore) team
+- [ASP.NET Core](https://github.com/dotnet/aspnetcore) team
